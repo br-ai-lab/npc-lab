@@ -38,7 +38,7 @@
 
 ---
 
-### 任务 1：仓库骨架与本地测试
+### Task 1：仓库骨架与本地测试
 
 **文件：**
 - 创建：`package.json`
@@ -91,7 +91,7 @@ git commit -m "chore: scaffold AI NPC team"
 
 ---
 
-### 任务 2：@ 提及解析器
+### Task 2：@ 提及解析器
 
 **文件：**
 - 创建：`scripts/mention.mjs`
@@ -172,7 +172,7 @@ git commit -m "feat: parse role mentions outside code, tables, lists, quotes"
 
 ---
 
-### 任务 3：团队配置
+### Task 3：团队配置
 
 **文件：**
 - 创建：`scripts/team.mjs`
@@ -252,7 +252,7 @@ git commit -m "feat: define five-role team configuration"
 
 ---
 
-### 任务 4：启动与写入门禁
+### Task 4：启动与写入门禁
 
 **文件：**
 - 创建：`scripts/gate.mjs`
@@ -326,7 +326,7 @@ git commit -m "feat: gate starts and writes on role, label, and mention"
 
 ---
 
-### 任务 5：NEXT 接力解析
+### Task 5：NEXT 接力解析
 
 **文件：**
 - 创建：`scripts/next.mjs`
@@ -387,7 +387,7 @@ git commit -m "feat: parse NEXT handoff protocol"
 
 ---
 
-### 任务 6：角色 prompt、Skill 与模板
+### Task 6：角色 prompt、Skill 与模板
 
 **文件：**
 - 创建：`.github/npc/roles/pm.md`
@@ -505,7 +505,7 @@ git commit -m "feat: add role prompts, skills, and handoff templates"
 
 ---
 
-### 任务 7：NPC Agent 复合 Action、分支/PR guard 与运行器
+### Task 7：NPC Agent 复合 Action、分支/PR guard 与运行器
 
 **文件：**
 - 创建：`.github/actions/npc-agent/action.yml`
@@ -623,7 +623,7 @@ git commit -m "feat: add NPC agent action and branch/PR guard"
 
 ---
 
-### 任务 8：项目经理 workflow
+### Task 8：项目经理 workflow
 
 **文件：**
 - 创建：`.github/workflows/npc-pm.yml`
@@ -694,7 +694,7 @@ git commit -m "feat: add PM workflow with human gate and draft PR"
 
 ---
 
-### 任务 9：Java workflow
+### Task 9：Java workflow
 
 **文件：**
 - 创建：`.github/workflows/npc-java.yml`
@@ -769,7 +769,7 @@ git commit -m "feat: add Java NPC workflow"
 
 ---
 
-### 任务 10：设置文档与配置校验
+### Task 10：设置文档与配置校验
 
 **文件：**
 - 创建：`docs/setup.md`
@@ -838,7 +838,7 @@ git commit -m "docs: add GitHub App setup and config verifier"
 
 ---
 
-### 任务 11：Stage 1 端到端验收
+### Task 11：Stage 1 端到端验收
 
 **文件：**
 - 创建：`docs/stage1-acceptance.md`
@@ -909,7 +909,7 @@ git commit -m "docs: record Stage 1 acceptance"
 
 ---
 
-### 任务 12：Stage 2 角色与 workflow
+### Task 12：Stage 2 角色与 workflow
 
 **文件：**
 - 创建：`.github/workflows/npc-ocr.yml`
@@ -961,7 +961,7 @@ git commit -m "feat: add OCR, React, and QA NPC workflows"
 
 ---
 
-### 任务 13：Stage 2 端到端验收
+### Task 13：Stage 2 端到端验收
 
 **文件：**
 - 创建：`docs/stage2-acceptance.md`
@@ -1016,7 +1016,7 @@ git commit -m "docs: record Stage 2 acceptance"
 
 ---
 
-### 任务 14：B 版本扩展点与运维手册
+### Task 14：B 版本扩展点与运维手册
 
 **文件：**
 - 创建：`docs/b-extension.md`
