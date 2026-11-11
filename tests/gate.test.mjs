@@ -33,3 +33,14 @@ test("canWrite follows the label", () => {
   assert.equal(canWrite(workMode), true);
   assert.equal(canWrite({ labels: [] }), false);
 });
+
+test("checks the requested role mention", () => {
+  assert.equal(
+    canStart({ authorAssociation: "OWNER", ...workMode, body: "@npc-java 请开始", role: "npc-java" }).ok,
+    true,
+  );
+  assert.equal(
+    canStart({ authorAssociation: "OWNER", ...workMode, body: "@npc-java 请开始", role: "npc-pm" }).ok,
+    false,
+  );
+});

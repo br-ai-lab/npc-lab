@@ -82,6 +82,7 @@ runs:
         AUTHOR_ASSOCIATION: ${{ github.event.comment.author_association || '' }}
         ISSUE_LABELS: ${{ join(github.event.issue.labels.*.name, ',') }}
         GATE_MODE: ${{ inputs.gate-mode }}
+        ROLE_SLUG: ${{ inputs.role-slug }}
       run: |
         if [ -z "$ISSUE_LABELS" ]; then
           ISSUE_LABELS=$(gh issue view "$ISSUE_NUMBER" --json labels --jq '.labels[].name' | paste -sd, -)
@@ -96,7 +97,7 @@ runs:
         STATUS=$?
         echo "$RESULT"
         if [ $STATUS -ne 0 ]; then
-          gh issue comment "$ISSUE_NUMBER" --body "AI NPC 启动被拒：需要仓库 Owner/Member/Collaborator 添加 \`npc-work-mode\` 标签，并在正文段落中 @npc-pm。"
+          gh issue comment "$ISSUE_NUMBER" --body "AI NPC 启动被拒：需要仓库 Owner/Member/Collaborator 添加 \`npc-work-mode\` 标签，并在正文段落中 @${ROLE_SLUG}。"
           exit 1
         fi
 
