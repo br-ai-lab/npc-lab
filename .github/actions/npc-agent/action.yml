@@ -1,0 +1,88 @@
+name: NPC Agent
+description: Run one NPC role with its GitHub App identity.
+
+inputs:
+  app-id:
+    description: GitHub App ID
+    required: true
+  private-key:
+    description: GitHub App private key
+    required: true
+  role-slug:
+    description: Role slug, also used as the App slug
+    required: true
+  role-prompt:
+    description: Path to the role prompt
+    required: true
+  allowed-tools:
+    description: Comma-separated allowed tools for Claude Code
+    required: true
+  issue-number:
+    description: Issue number
+    required: true
+  trigger-comment:
+    description: The comment that triggered this run
+    required: false
+  branch:
+    description: Issue working branch
+    required: true
+  ensure-branch-pr:
+    description: Create the Issue branch and draft PR if missing
+    required: false
+    default: "false"
+  claude-token:
+    description: CLAUDE_CODE_OAUTH_TOKEN
+    required: true
+
+runs:
+  using: composite
+  steps:
+    - name: Create GitHub App token
+      id: app-token
+      uses: actions/create-github-app-token@v1
+      with:
+        app-id: ${{ inputs.app-id }}
+        private-key: ${{ inputs.private-key }}
+
+    - name: Setup Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: "22"
+
+    - name: Install Claude Code
+      shell: bash
+      run: npm install -g @anthropic-ai/claude-code
+
+    - name: Configure git and gh
+      shell: bash
+      env:
+        GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        APP_ID: ${{ inputs.app-id }}
+        ROLE_SLUG: ${{ inputs.role-slug }}
+      run: |
+        gh auth setup-git
+        git config user.name "${ROLE_SLUG}[bot]"
+        git config user.email "${APP_ID}+${ROLE_SLUG}[bot]@users.noreply.github.com"
+
+    - name: Ensure Issue branch and draft PR
+      if: inputs.ensure-branch-pr == 'true'
+      shell: bash
+      env:
+        GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        ISSUE_NUMBER: ${{ inputs.issue-number }}
+        BRANCH: ${{ inputs.branch }}
+        BASE_BRANCH: main
+      run: node scripts/ensure-branch-pr.mjs
+
+    - name: Run NPC agent
+      shell: bash
+      env:
+        GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        CLAUDE_CODE_OAUTH_TOKEN: ${{ inputs.claude-token }}
+        ROLE_SLUG: ${{ inputs.role-slug }}
+        ROLE_PROMPT: ${{ inputs.role-prompt }}
+        ALLOWED_TOOLS: ${{ inputs.allowed-tools }}
+        ISSUE_NUMBER: ${{ inputs.issue-number }}
+        TRIGGER_COMMENT: ${{ inputs.trigger-comment }}
+        BRANCH: ${{ inputs.branch }}
+      run: node scripts/run-agent.mjs
