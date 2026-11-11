@@ -66,20 +66,9 @@ claude setup-token
 - 颜色：红色或橙色（例如 `#D93F0B`）
 - 描述：允许 AI 团队写入代码；只有 Owner/Member/Collaborator 可以添加。
 
-## 6. 保护 `main`
+## 6. 推送本地代码
 
-打开仓库 → **Settings → Branches → Add branch protection rule**：
-
-- Branch name pattern：`main`
-- 勾选 **Require a pull request before merging**
-- 取消勾选 **Dismiss stale pull request approvals when new commits are pushed**（参考案例里没有强制 review）
-- 勾选 **Do not allow bypassing the above settings**（如果可用）
-- 不要开启 **Allow auto-merge**
-- 保存
-
-这样 NPC 只能把提交推到 `ai-npcs/issue-<n>`，最终由人类合并 PR。
-
-## 7. 推送本地代码
+先推送代码，再开分支保护，避免第一次 push 被保护规则拦住。
 
 在本地 `npc-lab` 目录：
 
@@ -96,6 +85,19 @@ git push -u origin feat/ai-npc-team:main
 - `scripts/`
 - `.claude/skills/`
 - `.github/npc/`
+
+## 7. 保护 `main`
+
+打开仓库 → **Settings → Branches → Add branch protection rule**：
+
+- Branch name pattern：`main`
+- 勾选 **Require a pull request before merging**
+- 取消勾选 **Dismiss stale pull request approvals when new commits are pushed**（参考案例里没有强制 review）
+- 勾选 **Do not allow bypassing the above settings**（如果可用）
+- 不要开启 **Allow auto-merge**
+- 保存
+
+这样 NPC 只能把提交推到 `ai-npcs/issue-<n>`，最终由人类合并 PR。
 
 ## 8. 验证
 
