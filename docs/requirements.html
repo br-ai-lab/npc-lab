@@ -1,0 +1,1435 @@
+<meta name="claude:viewport-fit-sides" content="cover">
+<title>AI 团队协作需求</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;family=IBM+Plex+Sans:wght@400;500;600&amp;family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&amp;display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f7f3;
+    --surface: #ffffff;
+    --surface-2: #edf2ee;
+    --ink: #17211e;
+    --muted: #5b6b65;
+    --line: #dce3dd;
+    --accent: #0e6b5c;
+    --accent-strong: #0a5146;
+    --accent-soft: #e4f1ed;
+    --warn: #9a5a12;
+    --warn-soft: #faf0df;
+    --code-bg: #edf2ee;
+    --code-ink: #1e3731;
+    --shadow: 0 1px 2px rgba(23, 33, 30, 0.05), 0 10px 28px rgba(23, 33, 30, 0.05);
+    --radius: 14px;
+    --font-display: "Newsreader", Georgia, "Songti SC", serif;
+    --font-body: "IBM Plex Sans", "PingFang SC", "Microsoft YaHei", sans-serif;
+    --font-mono: "IBM Plex Mono", "SFMono-Regular", Consolas, monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0c1311;
+      --surface: #121c19;
+      --surface-2: #172420;
+      --ink: #e7eeea;
+      --muted: #9baea6;
+      --line: #26332e;
+      --accent: #5fd3bf;
+      --accent-strong: #8ae3d2;
+      --accent-soft: #17332d;
+      --warn: #f0b35e;
+      --warn-soft: #2c2416;
+      --code-bg: #0f1916;
+      --code-ink: #d7e6e0;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 10px 28px rgba(0, 0, 0, 0.18);
+      color-scheme: dark;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    --bg: #0c1311;
+    --surface: #121c19;
+    --surface-2: #172420;
+    --ink: #e7eeea;
+    --muted: #9baea6;
+    --line: #26332e;
+    --accent: #5fd3bf;
+    --accent-strong: #8ae3d2;
+    --accent-soft: #17332d;
+    --warn: #f0b35e;
+    --warn-soft: #2c2416;
+    --code-bg: #0f1916;
+    --code-ink: #d7e6e0;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 10px 28px rgba(0, 0, 0, 0.18);
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.72;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 0;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: var(--accent); text-decoration-thickness: 1px; text-underline-offset: 3px; }
+  a:hover { color: var(--accent-strong); }
+  a:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 4px; }
+
+  .shell { max-width: 1160px; margin: 0 auto; }
+
+  .topbar {
+    border-bottom: 1px solid var(--line);
+    background: var(--surface);
+  }
+
+  .topbar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 14px 0;
+    min-width: 0;
+  }
+
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .brand-mark {
+    width: 26px;
+    height: 26px;
+    border-radius: 8px;
+    background: var(--accent);
+    color: var(--bg);
+    display: grid;
+    place-items: center;
+    flex: 0 0 auto;
+  }
+
+  .brand-mark svg { width: 15px; height: 15px; display: block; }
+
+  .brand span { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .topbar-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    font-size: 12px;
+    color: var(--muted);
+  }
+
+  .tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    padding: 3px 10px;
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--muted);
+    background: var(--surface);
+    white-space: nowrap;
+  }
+
+  .tag.accent { color: var(--accent); border-color: color-mix(in srgb, var(--accent) 35%, var(--line)); background: var(--accent-soft); }
+
+  .hero {
+    padding: 56px 0 34px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 14px;
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    line-height: 1.02;
+    letter-spacing: -0.03em;
+    font-weight: 500;
+    margin: 0 0 18px;
+    max-width: 13ch;
+    text-wrap: balance;
+  }
+
+  .hero-lead {
+    font-size: clamp(1.05rem, 2vw, 1.22rem);
+    color: var(--muted);
+    max-width: 62ch;
+    margin: 0 0 22px;
+  }
+
+  .hero-lead strong { color: var(--ink); font-weight: 600; }
+
+  .quick-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 12px;
+    margin-top: 28px;
+  }
+
+  .quick-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--accent);
+    border-radius: 12px;
+    padding: 14px 15px 15px;
+    min-width: 0;
+  }
+
+  .quick-card .k {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    color: var(--accent);
+    text-transform: uppercase;
+  }
+
+  .quick-card strong { display: block; margin: 4px 0 2px; font-size: 1rem; }
+  .quick-card p { margin: 0; font-size: 13px; line-height: 1.55; color: var(--muted); }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 230px minmax(0, 1fr);
+    gap: 56px;
+    padding: 44px 0 96px;
+  }
+
+  .toc {
+    position: sticky;
+    top: 24px;
+    align-self: start;
+    max-height: calc(100vh - 48px);
+    overflow-y: auto;
+    padding-right: 8px;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  .toc-title {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 10px;
+  }
+
+  .toc ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; }
+  .toc a { display: block; padding: 4px 0; color: var(--muted); text-decoration: none; border-left: 2px solid transparent; padding-left: 10px; }
+  .toc a:hover { color: var(--accent); border-left-color: var(--accent); }
+
+  .mobile-toc { display: none; margin: 0 0 20px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); padding: 12px 14px; }
+  .mobile-toc summary { cursor: pointer; font-weight: 600; }
+  .mobile-toc ol { margin: 10px 0 0; padding-left: 20px; color: var(--muted); }
+  .mobile-toc li { margin: 4px 0; }
+  .mobile-toc a { color: var(--muted); text-decoration: none; }
+  .mobile-toc a:hover { color: var(--accent); }
+
+  .content { min-width: 0; }
+
+  section {
+    scroll-margin-top: 24px;
+    padding: 38px 0 10px;
+    border-top: 1px solid var(--line);
+  }
+
+  section:first-of-type { border-top: 0; padding-top: 0; }
+
+  .sec-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+  .sec-num { font-family: var(--font-mono); font-size: 12px; letter-spacing: 0.08em; color: var(--accent); white-space: nowrap; }
+
+  h2 {
+    font-family: var(--font-display);
+    font-size: clamp(1.7rem, 3.4vw, 2.3rem);
+    line-height: 1.12;
+    letter-spacing: -0.02em;
+    font-weight: 500;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  h3 {
+    font-family: var(--font-body);
+    font-size: 1.08rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    margin: 30px 0 10px;
+  }
+
+  h4 { font-size: 0.98rem; margin: 0 0 6px; }
+
+  p { margin: 0 0 14px; max-width: 70ch; }
+  ul, ol { margin: 0 0 16px; padding-left: 22px; }
+  li { margin: 5px 0; max-width: 68ch; }
+  li > ul, li > ol { margin-top: 6px; margin-bottom: 4px; }
+
+  .callout {
+    border-left: 3px solid var(--accent);
+    background: var(--accent-soft);
+    border-radius: 0 12px 12px 0;
+    padding: 15px 18px;
+    margin: 20px 0;
+  }
+
+  .callout.warn { border-left-color: var(--warn); background: var(--warn-soft); }
+  .callout p:last-child { margin-bottom: 0; }
+  .callout .label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    display: block;
+    margin-bottom: 4px;
+  }
+  .callout.warn .label { color: var(--warn); }
+
+  .role-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; margin: 18px 0 8px; }
+
+  .role-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px 16px 14px;
+    min-width: 0;
+  }
+
+  .role-head { display: flex; align-items: center; gap: 10px; margin-bottom: 6px; }
+  .role-icon {
+    width: 30px; height: 30px; border-radius: 9px;
+    display: grid; place-items: center;
+    background: var(--accent-soft); color: var(--accent);
+    flex: 0 0 auto;
+  }
+  .role-icon svg { width: 16px; height: 16px; display: block; }
+  .role-card p { margin: 0 0 8px; font-size: 14px; color: var(--muted); max-width: none; }
+  .role-card .boundary { font-size: 12.5px; color: var(--muted); border-top: 1px dashed var(--line); padding-top: 8px; margin-top: 8px; }
+  .role-card .boundary strong { color: var(--ink); font-weight: 600; }
+
+  .phase-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 18px 0 8px; }
+  .phase {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 14px 14px 13px;
+    min-width: 0;
+  }
+  .phase .num { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; color: var(--accent); }
+  .phase strong { display: block; margin: 3px 0 2px; font-size: 0.98rem; }
+  .phase p { margin: 0; font-size: 13px; line-height: 1.55; color: var(--muted); max-width: none; }
+
+  .table-wrap {
+    overflow-x: auto;
+    margin: 16px 0 24px;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--surface);
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; min-width: 560px; }
+  th, td { padding: 10px 12px; text-align: left; vertical-align: top; border-bottom: 1px solid var(--line); }
+  th { background: var(--surface-2); font-weight: 600; white-space: nowrap; }
+  tr:last-child td { border-bottom: 0; }
+  td.num, th.num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  .timeline { margin: 20px 0 10px; }
+  .tl-item {
+    display: grid;
+    grid-template-columns: 62px minmax(0, 1fr);
+    gap: 16px;
+    position: relative;
+    margin-left: 6px;
+    padding: 10px 0 10px 20px;
+    border-left: 2px solid var(--line);
+  }
+  .tl-item::before {
+    content: "";
+    position: absolute;
+    left: -7px;
+    top: 20px;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent);
+    border: 2px solid var(--bg);
+  }
+  .tl-time { font-family: var(--font-mono); font-size: 12.5px; color: var(--accent); font-variant-numeric: tabular-nums; padding-top: 1px; }
+  .tl-body { min-width: 0; }
+  .tl-body strong { display: block; font-size: 0.98rem; }
+  .tl-body p { margin: 2px 0 0; font-size: 14px; color: var(--muted); max-width: none; }
+
+  .diagram {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 18px 16px;
+    margin: 18px 0 24px;
+    overflow-x: auto;
+  }
+  .diagram pre.mermaid { margin: 0; background: transparent; font-family: var(--font-mono); font-size: 12px; }
+
+  .example {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 15px 17px;
+    margin: 14px 0;
+  }
+  .example .who {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .example blockquote {
+    margin: 8px 0 0;
+    padding-left: 14px;
+    border-left: 2px solid var(--accent);
+    color: var(--ink);
+  }
+  .example blockquote p { margin: 0 0 8px; max-width: none; }
+  .example blockquote p:last-child { margin-bottom: 0; }
+
+  pre.template {
+    background: var(--code-bg);
+    color: var(--code-ink);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 16px;
+    overflow-x: auto;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    margin: 14px 0 22px;
+  }
+
+  .questions { counter-reset: q; list-style: none; padding-left: 0; }
+  .questions li {
+    counter-increment: q;
+    position: relative;
+    padding: 10px 0 10px 44px;
+    border-bottom: 1px solid var(--line);
+    max-width: none;
+    margin: 0;
+  }
+  .questions li::before {
+    content: counter(q);
+    position: absolute;
+    left: 0;
+    top: 11px;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    display: grid;
+    place-items: center;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .questions li:last-child { border-bottom: 0; }
+
+  .next-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 18px 0 8px; }
+  .next-card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 15px; }
+  .next-card .num { font-family: var(--font-mono); font-size: 11px; color: var(--accent); letter-spacing: 0.08em; }
+  .next-card strong { display: block; margin: 3px 0 2px; }
+  .next-card p { margin: 0; font-size: 13.5px; color: var(--muted); max-width: none; }
+
+  footer {
+    border-top: 1px solid var(--line);
+    background: var(--surface);
+    padding: 28px 0 40px;
+    color: var(--muted);
+    font-size: 13px;
+  }
+  footer .shell { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+  footer strong { color: var(--ink); }
+
+  .roadmap { display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; align-items: stretch; margin: 18px 0 8px; }
+  .roadmap-card { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 16px; min-width: 0; }
+  .roadmap-card .stage { font-family: var(--font-mono); font-size: 11px; letter-spacing: 0.08em; color: var(--accent); }
+  .roadmap-card strong { display: block; margin: 3px 0 4px; }
+  .roadmap-card p { margin: 0; font-size: 14px; color: var(--muted); max-width: none; }
+  .roadmap-arrow { display: grid; place-items: center; color: var(--accent); font-size: 22px; }
+
+  @media (max-width: 1000px) {
+    .quick-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .phase-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; gap: 0; padding-top: 28px; }
+    .toc { display: none; }
+    .mobile-toc { display: block; }
+    .role-grid { grid-template-columns: 1fr; }
+    .next-grid { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 560px) {
+    .quick-grid { grid-template-columns: 1fr; }
+    .phase-grid { grid-template-columns: 1fr; }
+    .hero { padding-top: 40px; }
+    .tl-item { grid-template-columns: 52px minmax(0, 1fr); gap: 10px; padding-left: 16px; }
+    .topbar-meta { display: none; }
+    table { min-width: 520px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+  }
+</style>
+
+<header class="topbar">
+  <div class="shell topbar-inner">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+      </span>
+      <span>AI 团队协作需求</span>
+    </div>
+    <div class="topbar-meta">
+      <span class="tag accent">v0.2 · 待确认</span>
+      <span class="tag">先 A 后 B</span>
+      <span class="tag">2026-11-11</span>
+      <span class="tag">面向小白</span>
+    </div>
+  </div>
+</header>
+
+<main class="shell">
+  <div class="hero">
+    <p class="eyebrow">需求文档 · 只讲要什么，不讲怎么做</p>
+    <h1>让 5 个 AI 角色<br>在 Issue 里接力干活</h1>
+    <p class="hero-lead">这是一份写给<strong>第一次接触 AI 协作</strong>的同学的需求与流程说明书。它描述一支“住在 Issue 里的 AI 团队”应该怎么发起、怎么派活、怎么汇报、怎么验收，并用一个真实的访客管理系统案例把每一步讲清楚。</p>
+    <div class="quick-grid">
+      <div class="quick-card"><span class="k">01 · 发起</span><strong>人类</strong><p>开 Issue、@项目经理、给写入权限。</p></div>
+      <div class="quick-card"><span class="k">02 · 拆解</span><strong>项目经理 AI</strong><p>读需求、拆任务、写派工单。</p></div>
+      <div class="quick-card"><span class="k">03 · 执行</span><strong>专家 AI</strong><p>OCR、后端、前端、测试各自干活。</p></div>
+      <div class="quick-card"><span class="k">04 · 验收</span><strong>人类 + 测试</strong><p>测试通过，人类最终合并/关闭。</p></div>
+    </div>
+  </div>
+
+  <div class="layout">
+    <nav class="toc" aria-label="目录">
+      <p class="toc-title">目录</p>
+      <ol>
+        <li><a href="#s0">0 · 先看结论</a></li>
+        <li><a href="#s1">1 · 背景：Issue #4</a></li>
+        <li><a href="#s2">2 · 目标与非目标</a></li>
+        <li><a href="#s3">3 · 角色与职责</a></li>
+        <li><a href="#s4">4 · 术语表</a></li>
+        <li><a href="#s5">5 · 总体流程</a></li>
+        <li><a href="#s6">6 · 阶段详细规则</a></li>
+        <li><a href="#s7">7 · 协作规则</a></li>
+        <li><a href="#s8">8 · 完整案例</a></li>
+        <li><a href="#s9">9 · 分阶段验证</a></li>
+        <li><a href="#s10">10 · 整体验收标准</a></li>
+        <li><a href="#s11">11 · 失败场景</a></li>
+        <li><a href="#s12">12 · 非功能性需求</a></li>
+        <li><a href="#s13">13 · 开放问题</a></li>
+        <li><a href="#s14">14 · 模板附录</a></li>
+        <li><a href="#s15">15 · 下一步</a></li>
+      </ol>
+    </nav>
+
+    <div class="content">
+      <details class="mobile-toc">
+        <summary>目录</summary>
+        <ol>
+          <li><a href="#s0">0 · 先看结论</a></li>
+          <li><a href="#s1">1 · 背景：Issue #4</a></li>
+          <li><a href="#s2">2 · 目标与非目标</a></li>
+          <li><a href="#s3">3 · 角色与职责</a></li>
+          <li><a href="#s4">4 · 术语表</a></li>
+          <li><a href="#s5">5 · 总体流程</a></li>
+          <li><a href="#s6">6 · 阶段详细规则</a></li>
+          <li><a href="#s7">7 · 协作规则</a></li>
+          <li><a href="#s8">8 · 完整案例</a></li>
+          <li><a href="#s9">9 · 分阶段验证</a></li>
+          <li><a href="#s10">10 · 整体验收标准</a></li>
+          <li><a href="#s11">11 · 失败场景</a></li>
+          <li><a href="#s12">12 · 非功能性需求</a></li>
+          <li><a href="#s13">13 · 开放问题</a></li>
+          <li><a href="#s14">14 · 模板附录</a></li>
+          <li><a href="#s15">15 · 下一步</a></li>
+        </ol>
+      </details>
+
+      <section id="s0">
+        <div class="sec-head"><span class="sec-num">00</span><h2>先看结论</h2></div>
+        <p>我们要的是一支“住在 Issue 里的 AI 团队”：</p>
+        <ul>
+          <li>人类负责发起任务、给权限、最后验收；</li>
+          <li>项目经理 AI 负责拆任务、派活、盯进度、做总结；</li>
+          <li>OCR、Java 开发、React 开发、测试等 AI 各自干活，完成后 @ 回项目经理；</li>
+          <li>所有过程都留在 Issue 评论里，谁做了什么一目了然；</li>
+          <li>每个 AI 有自己的名字和头像，看起来像不同的同事。</li>
+        </ul>
+        <p>最终要复刻的题目是“访客管理系统 + OCR”；先用一个小任务验证流程，再上完整团队。</p>
+        <div class="callout">
+          <span class="label">阅读提示</span>
+          <p>本文只描述“要什么、怎么协作、怎么算完成”，不涉及具体技术实现。你不需要懂编程，也能看懂每个角色在做什么。</p>
+        </div>
+
+        <h3>0.1 已确认的决策（2026-11-11）</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>决策项</th><th>结论</th></tr></thead>
+            <tbody>
+              <tr><td>交付目标</td><td>先做 A（完整复刻访客系统 + 可复用模板），跑通后再扩展为 B（通用运行时）</td></tr>
+              <tr><td>项目约束</td><td>在 GitHub 新仓库从零搭建；参考案例只提供协作模式，不复用其平台</td></tr>
+              <tr><td>权限强制</td><td>独立身份、写入授权、主分支保护、禁止自动合并必须技术强制；目录边界和角色纪律先用 prompt + 评审约束</td></tr>
+              <tr><td>人工介入</td><td>正常无人值守；遇到歧义/阻塞时停止并 @ 人类；v1 不做暂停/恢复；最终以 open PR 等待人类 review/merge</td></tr>
+              <tr><td>成本上限</td><td>单次完整运行 $10；达到上限停止并请人类确认</td></tr>
+              <tr><td>最大接力</td><td>Stage 1 最多 5 轮；Stage 2 最多 20 轮</td></tr>
+              <tr><td>自动合并</td><td>中间过程自动提交到当前 Issue 的工作分支，不需要人类逐步确认；最终 PR 不自动合并，必须由人类 review/merge</td></tr>
+              <tr><td>分支策略</td><td>每个 Issue 新建一个工作分支（命名为 ai-npcs/issue-&lt;编号&gt;）；该 Issue 的所有改动都提交到这个分支；第一个被触发的 NPC 代建分支和 draft PR；禁止直接改 main</td></tr>
+              <tr><td>单条评论 @ 上限</td><td>建议最多 3 个角色（平台上限 10）</td></tr>
+              <tr><td>语言</td><td>评论内容跟随 Issue 主体语言（中文 Issue 用中文，英文 Issue 用英文）；代码/接口名保持英文</td></tr>
+              <tr><td>数据库与联调</td><td>按需求选型（SQLite）；前端必须调用后端接口；测试包含前后端集成用例</td></tr>
+              <tr><td>Stage 2 图片</td><td>默认使用参考案例中的《公司访客管理制度》图片；找不到时由人类提供</td></tr>
+              <tr><td>Stage 3</td><td>从 A 泛化为 B：角色、模板、仓库/任务参数配置化，支持多身份、多仓库</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>交付路线：先 A，后 B</h3>
+        <div class="roadmap">
+          <div class="roadmap-card">
+            <span class="stage">A · 先跑通</span>
+            <strong>一次完整复刻 + 可复用模板</strong>
+            <p>完整做出访客管理系统 + OCR，整理角色、派工单、汇报和流程模板。以后做别的项目，可以照着模板再搭一次。</p>
+          </div>
+          <div class="roadmap-arrow" aria-hidden="true">→</div>
+          <div class="roadmap-card">
+            <span class="stage">B · 再扩展</span>
+            <strong>可复用的 AI 团队运行时</strong>
+            <p>把角色、模板、仓库/任务参数配置化，换仓库、换任务也能直接跑。B 的验收标准另立文档。</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="s1">
+        <div class="sec-head"><span class="sec-num">01</span><h2>背景：Issue #4 发生了什么</h2></div>
+        <h3>一句话版本</h3>
+        <p>一个人发了一条 Issue，5 个 AI 角色在约 53 分钟内接力完成了一个访客管理系统。</p>
+        <p>参考案例：<a href="https://cnb.cool/tech-shrimp/guest-management-system/-/issues/4">Issue #4</a></p>
+
+        <h3>详细过程</h3>
+        <div class="timeline">
+          <div class="tl-item"><div class="tl-time">15:39</div><div class="tl-body"><strong>人类发起人</strong><p>在 Issue 里 @项目经理，提出访客系统需求，并开启写入权限。</p></div></div>
+          <div class="tl-item"><div class="tl-time">15:40</div><div class="tl-body"><strong>项目经理</strong><p>读需求、规划 6 个阶段，@OCR 识别制度图片。</p></div></div>
+          <div class="tl-item"><div class="tl-time">15:46</div><div class="tl-body"><strong>OCR</strong><p>完成识别，@项目经理 汇报。</p></div></div>
+          <div class="tl-item"><div class="tl-time">15:47</div><div class="tl-body"><strong>项目经理</strong><p>发现文件还没提交，@OCR 要求提交到开发分支。</p></div></div>
+          <div class="tl-item"><div class="tl-time">15:52</div><div class="tl-body"><strong>OCR</strong><p>报告已提交，@项目经理。</p></div></div>
+          <div class="tl-item"><div class="tl-time">15:54</div><div class="tl-body"><strong>项目经理</strong><p>@Java 开发，派发后端任务。</p></div></div>
+          <div class="tl-item"><div class="tl-time">16:00</div><div class="tl-body"><strong>Java 开发</strong><p>后端完成并自测，@项目经理。</p></div></div>
+          <div class="tl-item"><div class="tl-time">16:01</div><div class="tl-body"><strong>项目经理</strong><p>@OCR 重新识别章程，准备需求文档。</p></div></div>
+          <div class="tl-item"><div class="tl-time">16:08</div><div class="tl-body"><strong>OCR</strong><p>报告 T2 完成，@项目经理。</p></div></div>
+          <div class="tl-item"><div class="tl-time">16:09</div><div class="tl-body"><strong>项目经理</strong><p>正文里同时 @OCR 和 @React，派发两个任务。</p></div></div>
+          <div class="tl-item"><div class="tl-time">16:14</div><div class="tl-body"><strong>React 开发</strong><p>前端完成，附截图，@项目经理。</p></div></div>
+          <div class="tl-item"><div class="tl-time">16:15</div><div class="tl-body"><strong>项目经理</strong><p>@测试，派发 E2E 测试任务。</p></div></div>
+          <div class="tl-item"><div class="tl-time">16:29</div><div class="tl-body"><strong>测试</strong><p>30/30 用例通过，@项目经理。</p></div></div>
+          <div class="tl-item"><div class="tl-time">16:32</div><div class="tl-body"><strong>项目经理</strong><p>输出项目收官总结，不再 @ 人，流程结束。</p></div></div>
+        </div>
+        <p>最终结果（Issue 总结口径）：4 个提交、57 个文件、+5,624 行代码、30/30 测试通过。PR #5 页面显示 6 个提交、66 个文件，说明 PR 里还有总结之后的提交，或统计口径不同。</p>
+
+        <h3>从这个案例里抽出的 5 条经验</h3>
+        <ol>
+          <li><strong>项目经理不写代码</strong>，只负责拆任务、派活、汇总进度。</li>
+          <li><strong>每个派工单都写了“完成后 @ 回我”</strong>，否则接力会断。</li>
+          <li><strong>@ 必须单独成段</strong>；写在表格、列表、代码块、引用里的 @ 不会触发下一个角色。</li>
+          <li><strong>每个角色有自己的名字和头像</strong>，评论里能看出是“项目经理”还是“测试”。</li>
+          <li><strong>所有汇报都回到 Issue</strong>，Issue 就是团队的共享记忆。</li>
+        </ol>
+
+        <h3>1.4 参考案例里的权限与人工介入</h3>
+        <p>Issue #4 本身没有写规则；它的权限和人工介入是由三样东西共同决定的：人类的操作、NPC 仓库里的 prompt、平台的权限模型。</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>维度</th><th>Issue #4 的实际做法</th><th>靠什么保证</th></tr></thead>
+            <tbody>
+              <tr><td>写入授权</td><td>人类（仓库 Owner）在首条评论开启「替我上班」</td><td>平台强制</td></tr>
+              <tr><td>Token 权限</td><td>代码/PR/Issue/Release/制品库读写；角色上限 Developer；仅当前仓库；仅本次任务</td><td>平台强制</td></tr>
+              <tr><td>独立身份</td><td>每个 NPC 有平台角色名和头像；不是独立账号</td><td>平台提供</td></tr>
+              <tr><td>目录边界</td><td>项目经理在派工单里写范围；NPC prompt 约束自己只改某目录</td><td>prompt，不是平台强制</td></tr>
+              <tr><td>角色纪律</td><td>项目经理不写代码；开发只改自己目录</td><td>prompt</td></tr>
+              <tr><td>分支/合并</td><td>每个 Issue 新建一个工作分支（命名为 ai-npcs/issue-&lt;编号&gt;；Issue #4 是 develop）；第一个被触发的 NPC 代建分支和 draft PR；该 Issue 的所有提交都在这个分支上；PR 保持 Open，等待人类 review/merge</td><td>推断 + 页面可确认的 PR #5；平台不自动合并</td></tr>
+              <tr><td>主分支保护</td><td>从 Issue 里看不出是否配置了 main 保护</td><td>不确定</td></tr>
+              <tr><td>人工介入</td><td>人类在 Issue 里只发起一次；之后没有在 Issue 里评论；PR 创建者显示为人类账号（可能是 NPC 代建），标题被人类改过，但没有合并</td><td>实际行为；PR 是验收环节</td></tr>
+              <tr><td>暂停/恢复</td><td>没有；链条靠 NPC 之间 @ 提及继续</td><td>平台没有暂停/恢复机制</td></tr>
+              <tr><td>最终验收</td><td>Issue 仍是 Open；PR #5 也是 Open，未合并；PR 就是等待人类验收的闸门</td><td>验收未完成，但闸门已建立</td></tr>
+              <tr><td>停止条件</td><td>没有新的 @ 就停；平台限制一条评论最多 10 个 NPC、评论超过 100 条不再触发</td><td>平台 + prompt</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>参考案例的 PR：<strong>#5《完整实现 公司访客管理系统》</strong>，<code>develop</code> → <code>main</code>，6 个提交、66 个文件，状态 <strong>Open</strong>，无冲突，未自动合并；PR 正文标注“以下内容由 AI 生成”。这说明最后的验收闸门是 PR，而不是 Issue 评论。</p>
+        <p>PR 的创建者和分支创建时机无法从页面完全确认；把 PR #5 和 Issue 时间线放在一起，最合理的解释是：<strong>第一个被触发的 NPC 代建了 Issue 工作分支和 draft PR，后续所有提交都在该分支上</strong>。</p>
+        <p>注意：Issue #4 的总结写的是 4 个提交、57 个文件；PR #5 页面显示 6 个提交、66 个文件，说明 PR 里还有总结之后的提交，或统计口径不同。</p>
+        <div class="callout">
+          <span class="label">对照你的需求</span>
+          <p>你选的“关键项技术强制 + 目录边界用 prompt”与参考案例一致：身份、写入授权是平台强制的；目录和角色纪律主要靠 prompt。你选的“无人值守，阻塞时停”与参考案例的实际行为一致：人类只在开头出现，之后由 NPC 自己接力。你的“人类最终验收、不自动合并”与参考案例一致：参考案例最后有一个 open PR（develop → main），没有自动合并，正在等待人类 review/merge；只是 Issue 本身还没有关闭。</p>
+        </div>
+      </section>
+
+      <section id="s2">
+        <div class="sec-head"><span class="sec-num">02</span><h2>目标与非目标</h2></div>
+        <h3>目标</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>编号</th><th>目标</th></tr></thead>
+            <tbody>
+              <tr><td class="num">G1</td><td>人类只需发起一次，AI 团队就能自动接力推进</td></tr>
+              <tr><td class="num">G2</td><td>5 个角色拥有独立身份（名字、头像、评论署名）</td></tr>
+              <tr><td class="num">G3</td><td>项目经理能拆任务、派活、追踪进度、输出总结</td></tr>
+              <tr><td class="num">G4</td><td>专家角色能执行任务、自测、提交代码、汇报结果</td></tr>
+              <tr><td class="num">G5</td><td>全部过程可见、可追溯、可审计</td></tr>
+              <tr><td class="num">G6</td><td>先用小任务验证流程，再完成“访客管理系统 + OCR”完整题目；交付目标分两步：先做 A（完整复刻 + 可复用模板），跑通后扩展为 B（通用运行时）</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h3>非目标</h3>
+        <ul>
+          <li>不是通用聊天机器人；</li>
+          <li>不是自定义管理后台或可视化大屏；</li>
+          <li>不是完全无人值守：人类保留最终验收权；</li>
+          <li>不替代人工代码评审和安全审查；</li>
+          <li>本文不规定具体技术栈、平台实现或部署方式。</li>
+        </ul>
+      </section>
+
+      <section id="s3">
+        <div class="sec-head"><span class="sec-num">03</span><h2>角色与职责</h2></div>
+        <div class="role-grid">
+          <div class="role-card">
+            <div class="role-head"><span class="role-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 3.6-7 8-7s8 3 8 7"/></svg></span><h4>人类发起人</h4></div>
+            <p>发起任务、开启写入权限、回答问题、最终验收。</p>
+            <div class="boundary"><strong>边界：</strong>不直接改代码。<br><strong>完成标准：</strong>任务被接受或关闭。</div>
+          </div>
+          <div class="role-card">
+            <div class="role-head"><span class="role-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M4 12h16M4 17h10"/></svg></span><h4>项目经理 AI</h4></div>
+            <p>读 Issue、澄清需求、拆任务、派活、追踪、总结。</p>
+            <div class="boundary"><strong>边界：</strong>不写业务代码、不越过人类授权。<br><strong>完成标准：</strong>所有任务有负责人、有状态、有总结。</div>
+          </div>
+          <div class="role-card">
+            <div class="role-head"><span class="role-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v14H4z"/><path d="M8 9h8M8 13h6"/></svg></span><h4>OCR AI</h4></div>
+            <p>识别图片中的文字，整理为 Markdown 文档。</p>
+            <div class="boundary"><strong>边界：</strong>不修改业务代码。<br><strong>完成标准：</strong>文档完整、格式正确、位置符合要求。</div>
+          </div>
+          <div class="role-card">
+            <div class="role-head"><span class="role-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="14" width="18" height="6" rx="1.5"/><path d="M7 7h.01M7 17h.01"/></svg></span><h4>Java 后端 AI</h4></div>
+            <p>实现后端接口、数据模型、校验、自测。</p>
+            <div class="boundary"><strong>边界：</strong>只改后端目录。<br><strong>完成标准：</strong>接口可用、自测通过、代码已提交。</div>
+          </div>
+          <div class="role-card">
+            <div class="role-head"><span class="role-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 9h18M9 20V9"/></svg></span><h4>React 前端 AI</h4></div>
+            <p>实现前端页面、交互、响应式、截图。</p>
+            <div class="boundary"><strong>边界：</strong>只改前端目录。<br><strong>完成标准：</strong>页面可用、校验正确、截图齐全。</div>
+          </div>
+          <div class="role-card">
+            <div class="role-head"><span class="role-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg></span><h4>测试 AI</h4></div>
+            <p>编写并执行端到端测试，报告结果。</p>
+            <div class="boundary"><strong>边界：</strong>只改测试目录。<br><strong>完成标准：</strong>测试真实执行、结果可复现。</div>
+          </div>
+        </div>
+        <div class="callout warn">
+          <span class="label">角色边界的三条硬规则</span>
+          <p>1. 项目经理不写代码，所有代码修改必须派给开发角色。<br>2. 开发只改自己负责的目录。<br>3. 测试必须真实执行，不能只写测试文件不运行。</p>
+        </div>
+      </section>
+
+      <section id="s4">
+        <div class="sec-head"><span class="sec-num">04</span><h2>术语表（小白版）</h2></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>术语</th><th>解释</th></tr></thead>
+            <tbody>
+              <tr><td><strong>Issue</strong></td><td>一个任务帖/讨论串，所有沟通都发生在它下面</td></tr>
+              <tr><td><strong>评论</strong></td><td>Issue 下面的一条消息，用来派活、汇报、追问</td></tr>
+              <tr><td><strong>@ 提及</strong></td><td>在评论里点名某个角色，等于给它派活或叫它回话</td></tr>
+              <tr><td><strong>角色</strong></td><td>一个有名字、有头像、有职责的 AI 同事</td></tr>
+              <tr><td><strong>派工单</strong></td><td>项目经理写给某个角色的一段任务说明</td></tr>
+              <tr><td><strong>接力</strong></td><td>一个角色完成后 @ 下一个角色，流程继续往下走</td></tr>
+              <tr><td><strong>分支</strong></td><td>代码的一个独立版本线，避免直接改主分支</td></tr>
+              <tr><td><strong>提交</strong></td><td>把代码改动记录到版本历史里</td></tr>
+              <tr><td><strong>自测</strong></td><td>角色自己先跑一遍构建/接口/页面，确认基本可用</td></tr>
+              <tr><td><strong>验收标准</strong></td><td>判断任务是否完成的明确条件</td></tr>
+              <tr><td><strong>写入权限</strong></td><td>允许 AI 改代码、提交、开合并请求的授权</td></tr>
+              <tr><td><strong>独立身份</strong></td><td>每个角色有自己的名字和头像，评论里能区分是谁</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="s5">
+        <div class="sec-head"><span class="sec-num">05</span><h2>总体流程</h2></div>
+        <h3>七个阶段</h3>
+        <div class="phase-grid">
+          <div class="phase"><span class="num">Phase 0</span><strong>准备</strong><p>定义角色、权限、模板。</p></div>
+          <div class="phase"><span class="num">Phase 1</span><strong>发起</strong><p>人类开 Issue、@项目经理、给写入权限。</p></div>
+          <div class="phase"><span class="num">Phase 2</span><strong>分析</strong><p>项目经理读需求、澄清、拆任务。</p></div>
+          <div class="phase"><span class="num">Phase 3</span><strong>派活</strong><p>项目经理写派工单，@ 专家角色。</p></div>
+          <div class="phase"><span class="num">Phase 4</span><strong>执行</strong><p>专家干活、自测、提交。</p></div>
+          <div class="phase"><span class="num">Phase 5</span><strong>汇报</strong><p>专家 @ 回项目经理，报告结果。</p></div>
+          <div class="phase"><span class="num">Phase 6</span><strong>追踪</strong><p>项目经理重读 Issue、更新进度、派下一步。</p></div>
+          <div class="phase"><span class="num">Phase 7</span><strong>验收</strong><p>项目经理总结，人类验收、合并/关闭。</p></div>
+        </div>
+
+        <h3>时序图</h3>
+        <div class="diagram">
+          <pre class="mermaid">
+sequenceDiagram
+    participant H as 人类发起人
+    participant PM as 项目经理 AI
+    participant OCR as OCR AI
+    participant DEV as 开发 AI
+    participant QA as 测试 AI
+
+    H->>PM: @项目经理 + 需求 + 写入权限
+    PM->>PM: 读 Issue、澄清、拆任务
+    PM->>OCR: @OCR 派工单
+    OCR->>PM: 完成汇报 @项目经理
+    PM->>DEV: @开发 派工单
+    DEV->>PM: 完成汇报 @项目经理
+    PM->>QA: @测试 派工单
+    QA->>PM: 测试结果 @项目经理
+    PM->>H: 最终总结，请验收
+          </pre>
+        </div>
+
+        <h3>状态机</h3>
+        <div class="diagram">
+          <pre class="mermaid">
+stateDiagram-v2
+    [*] --> 待发起
+    待发起 --> 已发起: 人类开 Issue 并授权
+    已发起 --> 已拆解: 项目经理输出任务表
+    已拆解 --> 执行中: 项目经理派活
+    执行中 --> 待汇报: 专家完成自测
+    待汇报 --> 执行中: 项目经理派下一步
+    待汇报 --> 返工: 验收不通过
+    返工 --> 执行中: 重新派活
+    待汇报 --> 已完成: 所有任务通过
+    已完成 --> [*]: 人类验收/关闭
+    执行中 --> 阻塞: 专家报告阻塞
+    阻塞 --> 执行中: 项目经理调整
+    阻塞 --> 需人工介入: 无法自动解决
+    需人工介入 --> 执行中: 人类给出指示
+          </pre>
+        </div>
+      </section>
+
+      <section id="s6">
+        <div class="sec-head"><span class="sec-num">06</span><h2>每个阶段的详细规则</h2></div>
+
+        <h3>Phase 0 · 准备</h3>
+        <p><strong>触发：</strong>项目开始前。<strong>参与者：</strong>人类发起人、人类仓库管理员。</p>
+        <p>需要准备：</p>
+        <ol>
+          <li><strong>角色名册：</strong>每个角色的名字、头像、职责、边界。</li>
+          <li><strong>权限规则：</strong>谁可以发起、谁可以授权、AI 能改哪些目录。</li>
+          <li><strong>Issue 模板：</strong>人类发起任务时填写。</li>
+          <li><strong>派工单模板：</strong>项目经理派活时使用。</li>
+          <li><strong>汇报模板：</strong>专家完成任务时使用。</li>
+          <li><strong>进度表模板：</strong>项目经理维护状态。</li>
+          <li><strong>验收标准模板：</strong>每个任务的完成条件。</li>
+        </ol>
+
+        <h3>Phase 1 · 发起</h3>
+        <p><strong>触发：</strong>人类在 Issue 里 @项目经理，并开启写入权限。</p>
+        <p>人类的 Issue 必须包含：</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>字段</th><th>说明</th><th>例子</th></tr></thead>
+            <tbody>
+              <tr><td>目标</td><td>最终要做出什么</td><td>做一个访客管理系统</td></tr>
+              <tr><td>背景</td><td>为什么要做、有什么参考材料</td><td>根目录有一张公司访客管理制度图片</td></tr>
+              <tr><td>交付物</td><td>需要哪些文件/功能</td><td>后端、前端、测试、文档</td></tr>
+              <tr><td>约束</td><td>技术/目录/时间/风格要求</td><td>后端 Java、前端 React、数据库 SQLite</td></tr>
+              <tr><td>验收标准</td><td>怎么算完成</td><td>6 项登记信息、手机号校验、测试通过</td></tr>
+              <tr><td>权限</td><td>是否允许 AI 写代码</td><td>已开启写入权限</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p><strong>项目经理的动作：</strong>通读 Issue 和已有评论 → 复述目标 → 列出理解 → 有缺失先提问 → 确认权限范围 → 进入 Phase 2。</p>
+        <p><strong>失败处理：</strong>信息不足就列问题等人类回答；没有写入权限就只做分析不派开发任务；需求矛盾就指出冲突请人类裁决。</p>
+
+        <h3>Phase 2 · 分析</h3>
+        <p><strong>输出：任务拆分表。</strong></p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>列</th><th>说明</th></tr></thead>
+            <tbody>
+              <tr><td>编号</td><td>T1、T2……</td></tr>
+              <tr><td>任务</td><td>一句话描述</td></tr>
+              <tr><td>负责角色</td><td>OCR / Java / React / 测试</td></tr>
+              <tr><td>优先级</td><td>P0 / P1 / P2</td></tr>
+              <tr><td>依赖</td><td>必须先完成哪些任务</td></tr>
+              <tr><td>验收标准</td><td>怎么算完成</td></tr>
+              <tr><td>状态</td><td>待开始 / 进行中 / 已完成 / 阻塞</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p><strong>规则：</strong>每个任务必须能独立执行、有明确交付物、有验收标准；有依赖的写清顺序；项目经理不写代码。</p>
+        <p><strong>示例：</strong></p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>编号</th><th>任务</th><th>负责</th><th>优先级</th><th>依赖</th><th>验收标准</th></tr></thead>
+            <tbody>
+              <tr><td>T1</td><td>识别制度图片并生成 Markdown</td><td>OCR</td><td>P0</td><td>无</td><td>7 个章节完整、格式正确、已提交</td></tr>
+              <tr><td>T2</td><td>实现后端访客 API</td><td>Java</td><td>P0</td><td>T1</td><td>6 个接口可用、自测通过</td></tr>
+              <tr><td>T3</td><td>实现前端访客管理页面</td><td>React</td><td>P0</td><td>T1</td><td>登记/列表/离开/异常可用、响应式</td></tr>
+              <tr><td>T4</td><td>编写并执行 E2E 测试</td><td>测试</td><td>P1</td><td>T2、T3</td><td>测试真实执行、结果通过</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Phase 3 · 派活</h3>
+        <p><strong>派工单模板：</strong></p>
+        <pre class="template">@角色名 请执行 T{编号}。
+
+【目标】
+一句话说明要做什么。
+
+【背景】
+为什么要做、参考材料在哪里。
+
+【范围】
+只能修改哪些目录/文件。
+
+【交付物】
+需要产出哪些文件、功能、截图或文档。
+
+【分支】
+提交到哪个开发分支。
+
+【验收标准】
+1. ……
+2. ……
+
+【约束】
+- 不要修改范围外的文件；
+- 不要直接改主分支；
+- 不要泄露密钥；
+- 遇到阻塞立即汇报。
+
+【完成后】
+请 @项目经理 汇报，格式见汇报模板。</pre>
+        <p><strong>规则：</strong>@ 必须单独成段，不要放在表格、列表、代码块、引用里；一条评论最多 @ 10 个角色；可以同时派多个任务，但范围不能重叠；每个派工单必须写“完成后 @ 回我”；派完活就结束本轮。</p>
+        <p><strong>失败处理：</strong>角色没被触发就检查 @ 是否在正文段落；角色报告无权限就请人类检查授权；派工单信息不足时角色应提问，而不是自己猜。</p>
+
+        <h3>Phase 4 · 执行</h3>
+        <p><strong>执行步骤：</strong>读 Issue 全文 → 确认范围/交付物/验收标准 → 信息不足先提问 → 在指定目录完成工作 → 自己先跑一遍构建/接口/页面/测试 → 提交到指定分支 → 准备汇报。</p>
+        <p><strong>规则：</strong>只改自己负责的目录；不直接改主分支；不删除无关文件；不泄露密钥、令牌、个人信息；遇到阻塞立即汇报；不要伪造测试结果或截图。</p>
+        <p><strong>失败处理：</strong>构建失败先自己修；依赖缺失写进汇报；需求冲突请项目经理裁决；权限不足停止写操作并 @项目经理。</p>
+
+        <h3>Phase 5 · 汇报</h3>
+        <pre class="template">@项目经理 T{编号} 汇报。
+
+【状态】
+完成 / 部分完成 / 阻塞
+
+【做了什么】
+1. ……
+2. ……
+
+【改动文件】
+- 路径 1
+- 路径 2
+
+【分支与提交】
+分支：……
+提交：……
+
+【自测结果】
+- 构建：通过/失败
+- 接口：通过/失败
+- 页面：通过/失败
+- 测试：通过/失败
+
+【证据】
+截图/日志/链接
+
+【阻塞与风险】
+……
+
+【下一步】
+……
+
+请 @项目经理 继续安排。</pre>
+        <p><strong>规则：</strong>必须 @项目经理 且单独成段；必须写清状态、证据、下一步；失败也要汇报，不能沉默；不要只写“完成了”，要写清楚完成了什么。</p>
+
+        <h3>Phase 6 · 追踪与迭代</h3>
+        <p><strong>项目经理的动作：</strong>重新读 Issue（不依赖记忆）→ 找到最新汇报 → 核对验收标准 → 更新任务表 → 判断下一步：继续派活、要求返工、请人类介入、或输出总结。</p>
+        <p><strong>规则：</strong>项目经理没有跨轮记忆，Issue 就是记忆；每次被触发都要重新读上下文；不能假设专家已经完成，必须看证据；发现冲突先串行化；到达最大接力轮数时停止并请人类介入。</p>
+        <p><strong>失败处理：</strong>专家没 @ 回项目经理，接力会断，人类需要手动 @ 项目经理；两个专家改同一文件，暂停其中一个改串行；汇报缺少证据，要求补充；任务反复失败，升级给人类。</p>
+
+        <h3>Phase 7 · 验收与收尾</h3>
+        <p><strong>项目经理的最终总结必须包含：</strong>项目目标与结果、任务完成表、交付物清单、提交记录、测试结果、如何本地运行、已知问题与风险、需要人类确认的事项。</p>
+        <p><strong>规则：</strong>最终以 open PR（Issue 工作分支，例如 develop → main）的形式等待人类 review/merge；不自动合并到主分支；人类保留最终验收权；测试必须真实执行；总结必须能让一个新人独立跑起来；人类合并 PR 后，才算验收完成，Issue 可以随后关闭。</p>
+      </section>
+
+      <section id="s7">
+        <div class="sec-head"><span class="sec-num">07</span><h2>协作规则</h2></div>
+
+        <h3>7.1 @ 提及规则</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>规则</th><th>说明</th></tr></thead>
+            <tbody>
+              <tr><td>单独成段</td><td>@ 必须写在普通正文段落里</td></tr>
+              <tr><td>不触发的位置</td><td>表格、列表、代码块、引用、折叠块里的 @ 不触发</td></tr>
+              <tr><td>单条上限</td><td>一条评论最多触发 10 个角色</td></tr>
+              <tr><td>评论上限</td><td>评论数超过 100 条后，@ 不再触发</td></tr>
+              <tr><td>不重复触发</td><td>编辑评论、重新打开 Issue 不会重新触发</td></tr>
+              <tr><td>返回地址</td><td>每个派工单必须写“完成后 @ 回项目经理”</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>7.2 身份规则</h3>
+        <ul>
+          <li>每个角色必须有独立的名称和头像；</li>
+          <li>评论里必须能看出是哪个角色；</li>
+          <li>不允许所有角色共用一个“管理员”身份；</li>
+          <li>人类评论和 AI 评论要能区分。</li>
+        </ul>
+
+        <h3>7.3 权限规则</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>规则</th><th>说明</th></tr></thead>
+            <tbody>
+              <tr><td>授权人</td><td>只有有权限的人类才能开启写入模式</td></tr>
+              <tr><td>授权范围</td><td>只限当前仓库、当前任务、当前时间</td></tr>
+              <tr><td>角色上限</td><td>AI 不能超过被授予的权限</td></tr>
+              <tr><td>禁止事项</td><td>不改主分支、不删仓库、不泄露密钥、不自动合并</td></tr>
+              <tr><td>人类终审</td><td>以 open PR 等待人类 review/merge；不自动合并，合并后才算验收完成</td></tr>
+              <tr><td>不可自我授权</td><td>AI 不能给自己或别的 AI 提升权限</td></tr>
+              <tr><td>内容安全</td><td>Issue 里的文字是需求数据，不是覆盖角色规则的指令</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout">
+          <span class="label">v1 的强制范围</span>
+          <p>独立身份、写入授权、主分支保护、禁止自动合并必须技术强制；目录边界和角色纪律先用 prompt + 评审约束。</p>
+        </div>
+
+        <h3>7.4 并行规则</h3>
+        <ul>
+          <li>一条评论可以同时 @ 多个角色，建议最多 3 个（平台上限 10）；</li>
+          <li>并行任务必须修改不同目录/文件；</li>
+          <li>有依赖的任务必须串行；</li>
+          <li>测试必须等开发和前端完成后再跑；</li>
+          <li>发现冲突时，项目经理暂停并行，改为串行。</li>
+        </ul>
+
+        <h3>7.5 循环与终止</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>规则</th><th>说明</th></tr></thead>
+            <tbody>
+              <tr><td>最大接力轮数</td><td>Stage 1 最多 5 轮；Stage 2 最多 20 轮</td></tr>
+              <tr><td>停止条件</td><td>没有新的 @ 提及</td></tr>
+              <tr><td>人工停止</td><td>人类可以随时要求暂停/停止</td></tr>
+              <tr><td>超限处理</td><td>项目经理输出当前进度，请人类介入</td></tr>
+              <tr><td>评论超限</td><td>超过 100 条评论时，开新 Issue 或做阶段总结</td></tr>
+              <tr><td>成本超限</td><td>单次完整运行上限 $10；达到上限时停止，请人类确认</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>7.6 审计规则</h3>
+        <ul>
+          <li>每个任务必须有派工单和汇报；</li>
+          <li>每个代码变更必须有提交记录；</li>
+          <li>每个测试结果必须有执行证据；</li>
+          <li>每条评论必须显示角色身份；</li>
+          <li>时间、消耗、费用尽量可见；</li>
+          <li>不允许静默修改历史评论。</li>
+        </ul>
+
+        <h3>7.7 语言跟随规则</h3>
+        <ul>
+          <li>评论内容跟随 Issue 的主体语言：Issue 主体是中文，所有角色用中文评论；Issue 主体是英文，所有角色用英文评论。</li>
+          <li>判断依据：优先看 Issue 标题和正文的语言；正文混合时，以占比更高的语言为准；仍无法判断时，看触发评论的语言。</li>
+          <li>如果人类在评论里明确要求切换语言，以人类的最新要求为准。</li>
+          <li>代码、接口名、变量名保持英文；提交信息跟随仓库现有习惯。</li>
+          <li>角色名和 @ 提及保持角色定义中的写法，不因语言切换而改变。</li>
+          <li>验收时，分别用中文 Issue 和英文 Issue 各触发一次，检查所有角色评论的语言是否一致。</li>
+        </ul>
+
+        <h3>7.8 分支与 PR 模型</h3>
+        <ul>
+          <li>每个 Issue 新建一个工作分支，命名为 <code>ai-npcs/issue-&lt;编号&gt;</code>；Issue #4 用的是 <code>develop</code>。</li>
+          <li>第一个被触发的 NPC 负责创建该工作分支和 draft PR（目标 <code>main</code>），PR 标题包含 Issue 编号。</li>
+          <li>该 Issue 的所有文件改动都提交到这个工作分支，不创建逐任务分支，也不做中间合并。</li>
+          <li>所有 NPC 完成后，PR 保持 Open，等待人类 review/merge；不自动合并。</li>
+          <li>人类合并 PR 后，Issue 才算验收完成，可以关闭。</li>
+          <li>禁止直接改 <code>main</code>；禁止 NPC 自己合并 PR。</li>
+        </ul>
+      </section>
+
+      <section id="s8">
+        <div class="sec-head"><span class="sec-num">08</span><h2>完整案例：访客管理系统 + OCR</h2></div>
+        <h3>场景</h3>
+        <p>人类在 Issue 里发了一张《公司访客管理制度》的图片，并提出：</p>
+        <div class="example">
+          <span class="who">人类发起人</span>
+          <blockquote><p>根目录有一个公司访客管理制度的图片，我需要你先指挥 NPC 识别图片，把管理制度转换成 Markdown 格式存放到仓库里，然后根据图片内容拆解任务，开发一个公司访客管理的电子系统。创建两个文件夹，一个存放前端代码，一个存放后端代码，数据库使用 SQLite，后端使用 Java，前端用 React。其他不做约束，请你自行发挥，规划开发步骤。</p></blockquote>
+        </div>
+
+        <h3>任务拆解</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>编号</th><th>任务</th><th>负责</th><th>优先级</th><th>交付物</th></tr></thead>
+            <tbody>
+              <tr><td>T1</td><td>识别制度图片，生成 Markdown</td><td>OCR</td><td>P0</td><td>docs/公司访客管理制度.md</td></tr>
+              <tr><td>T2</td><td>后端访客 API</td><td>Java</td><td>P0</td><td>backend/、数据库脚本、README</td></tr>
+              <tr><td>T3</td><td>前端访客管理页面</td><td>React</td><td>P0</td><td>前端目录、截图、运行说明</td></tr>
+              <tr><td>T4</td><td>E2E 测试</td><td>测试</td><td>P1</td><td>测试代码、测试报告</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>说明：参考案例的工作分支叫 <code>develop</code>；按新需求，每个 Issue 会新建自己的分支，例如 <code>ai-npcs/issue-4</code>。示例评论里的 <code>develop</code> 是参考案例的分支名。</p>
+
+        <h3>示例评论</h3>
+        <div class="example">
+          <span class="who">项目经理 → OCR</span>
+          <blockquote><p>@OCR 请执行 T1。<br><br>【目标】识别仓库根目录的制度图片，转成 Markdown。<br>【范围】只能写 docs/ 目录。<br>【交付物】docs/公司访客管理制度.md。<br>【验收标准】7 个章节完整、格式正确、已提交到 develop 分支。<br>【完成后】请 @项目经理 汇报。</p></blockquote>
+        </div>
+        <div class="example">
+          <span class="who">OCR → 项目经理</span>
+          <blockquote><p>@项目经理 T1 完成。<br><br>【状态】完成<br>【改动文件】docs/公司访客管理制度.md<br>【分支与提交】develop / f4b4f48<br>【自测结果】7 个章节完整，23 个文本块已整理<br>【下一步】可以进入后端开发。</p></blockquote>
+        </div>
+        <div class="example">
+          <span class="who">项目经理 → OCR（返工）</span>
+          <blockquote><p>@OCR 我检查发现文档还没有提交到仓库。请把 docs/公司访客管理制度.md 提交到 develop 分支，完成后 @ 我。</p></blockquote>
+        </div>
+        <div class="example">
+          <span class="who">Java 开发 → 项目经理</span>
+          <blockquote><p>@项目经理 T2 完成。<br><br>【状态】完成<br>【交付物】6 个 REST 接口、数据库脚本、README<br>【分支与提交】develop / 417791d<br>【自测结果】登记、签入、签出、异常、详情、列表 10 项自测全部通过<br>【下一步】可以派前端任务。</p></blockquote>
+        </div>
+        <div class="example">
+          <span class="who">React 开发 → 项目经理</span>
+          <blockquote><p>@项目经理 T3 完成。<br><br>【状态】完成<br>【改动文件】前端组件、样式、状态管理<br>【分支与提交】develop / 3b50e3c<br>【自测结果】登记、列表、离开、异常记录可用；375/768/1024/1440 响应式正常<br>【证据】3 张页面截图<br>【下一步】可以进入测试。</p></blockquote>
+        </div>
+        <div class="example">
+          <span class="who">测试 → 项目经理</span>
+          <blockquote><p>@项目经理 T4 完成。<br><br>【状态】完成<br>【测试结果】30/30 用例全部通过<br>【覆盖范围】登记表单 12、列表 5、离开 4、异常 4、持久化 2、响应式 3<br>【分支与提交】develop / fd757b0<br>【下一步】可以收官。</p></blockquote>
+        </div>
+        <div class="example">
+          <span class="who">项目经理 → 人类</span>
+          <blockquote><p>🎉 访客管理系统开发完成。<br><br>任务完成表：T1 OCR ✅ / T2 后端 ✅ / T3 前端 ✅ / T4 测试 ✅<br>交付物：文档、后端、前端、测试<br>提交记录：f4b4f48、417791d、3b50e3c、fd757b0<br>测试结果：30/30 通过<br>已知问题：……<br>请人类验收。</p></blockquote>
+        </div>
+
+        <h3>交付物清单</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>交付物</th><th>内容</th></tr></thead>
+            <tbody>
+              <tr><td>制度文档</td><td>docs/公司访客管理制度.md</td></tr>
+              <tr><td>后端</td><td>backend/：接口、数据模型、数据库脚本、README</td></tr>
+              <tr><td>前端</td><td>前端目录：登记、列表、离开、异常记录、响应式</td></tr>
+              <tr><td>测试</td><td>测试目录：E2E 用例、运行说明</td></tr>
+              <tr><td>项目说明</td><td>根目录 README：如何启动前后端、如何跑测试</td></tr>
+              <tr><td>截图</td><td>桌面端、表单、移动端截图</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>验收标准</h3>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>模块</th><th>验收标准</th></tr></thead>
+            <tbody>
+              <tr><td>访客登记</td><td>姓名、电话、单位、被访人、事由、进入时间 6 项必填；手机号格式校验</td></tr>
+              <tr><td>访客签入</td><td>前台确认后可签入；记录进入时间；状态变为“在访”</td></tr>
+              <tr><td>访客签出</td><td>记录离开时间；确认访客证归还；状态变为“已离开”</td></tr>
+              <tr><td>访客列表</td><td>展示全部记录；支持“全部/在访/已离开”筛选；访客证编号格式 VIS-YYYYMMDD-NNN</td></tr>
+              <tr><td>异常记录</td><td>可填写异常描述；异常记录关联到对应访客</td></tr>
+              <tr><td>数据持久化</td><td>刷新页面后数据不丢失</td></tr>
+              <tr><td>响应式</td><td>375px / 768px / 1024px / 1440px 布局正常</td></tr>
+              <tr><td>测试</td><td>测试真实执行，结果可复现，附运行日志或截图</td></tr>
+              <tr><td>文档</td><td>README 能让新人独立启动项目</td></tr>
+              <tr><td>总结</td><td>项目经理总结包含交付物、提交、测试、运行方式、已知问题</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>参考案例的缺口（新需求要补上）</h3>
+        <div class="callout warn">
+          <span class="label">注意</span>
+          <p>参考案例里有几个不够理想的地方：需求写的是 SQLite，后端实际用了另一种文件数据库；前端用本地存储模拟数据，没有和后端真正联调；测试主要是前端 E2E，没有覆盖前后端集成；也没有明确“人类验收/合并”的环节。</p>
+        </div>
+        <p>新需求应明确：数据库选型以需求为准；前端必须调用后端接口，不能只做本地模拟；测试至少包含一组前后端集成用例；合并到主分支必须由人类确认。</p>
+      </section>
+
+      <section id="s9">
+        <div class="sec-head"><span class="sec-num">09</span><h2>分阶段验证计划</h2></div>
+        <h3>Stage 1 · 小任务验证（先做这个）</h3>
+        <p><strong>目的：</strong>验证“人类发起 → 项目经理派活 → 开发执行 → 汇报 → 项目经理总结”的闭环，不追求业务复杂度。</p>
+        <p><strong>角色：</strong>项目经理 + 1 个开发。</p>
+        <p><strong>任务例子（二选一）：</strong></p>
+        <ul>
+          <li>做一个 TODO 接口：新增、列表两个接口，附一条自测；</li>
+          <li>做一个简单页面：一个表单 + 一个列表，附一条页面测试。</li>
+        </ul>
+        <p><strong>通过标准：</strong></p>
+        <ol>
+          <li>人类只发起一次；</li>
+          <li>项目经理输出任务表并 @ 开发；</li>
+          <li>开发完成、自测、@ 回项目经理；</li>
+          <li>项目经理重读 Issue，输出总结；</li>
+          <li>两个角色评论显示不同名字/头像；</li>
+          <li>全程不需要人类手动催进度；</li>
+          <li>用中文和英文各发一条小任务，评论语言跟随 Issue。</li>
+        </ol>
+        <p><strong>停止条件：</strong>最多 5 轮接力；卡住就人工介入。</p>
+
+        <h3>Stage 2 · 完整团队 + 访客系统</h3>
+        <p><strong>角色：</strong>项目经理、OCR、Java、React、测试。</p>
+        <p><strong>任务：</strong>完整复刻第 8 节的访客管理系统 + OCR。</p>
+        <p><strong>图片：</strong>默认使用参考案例中的《公司访客管理制度》图片；如果找不到，由人类提供。</p>
+        <p><strong>通过标准：</strong>第 8 节验收标准全部满足；5 个角色都有独立身份；所有任务都有派工单和汇报；测试真实执行并附证据；项目经理输出完整总结；最终以一个 open PR（Issue 工作分支 → main）等待人类 review/merge，人类合并后才算验收通过。</p>
+
+        <h3>Stage 3 · 从 A 扩展为 B</h3>
+        <p>A 跑通后，再把“一次复刻”扩展成“通用运行时”。需要补的能力：</p>
+        <ul>
+          <li>角色可配置：角色名、头像、prompt、工具、目录范围从配置文件读取；</li>
+          <li>模板可配置：派工单、汇报、验收标准可替换；</li>
+          <li>仓库/任务可配置：换仓库、换任务不需要改代码；</li>
+          <li>多身份管理：角色身份的创建、授权、回收；</li>
+          <li>多仓库支持：从单仓库扩展到多个仓库；</li>
+          <li>失败重试、冲突处理、成本上限、审计记录、文档模板；</li>
+          <li>新人可照着文档复现。</li>
+        </ul>
+        <p>B 的验收标准另立文档；Stage 3 不阻塞 A 的验收。</p>
+      </section>
+
+      <section id="s10">
+        <div class="sec-head"><span class="sec-num">10</span><h2>整体验收标准</h2></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>维度</th><th>标准</th></tr></thead>
+            <tbody>
+              <tr><td>功能</td><td>7 个阶段都能跑通</td></tr>
+              <tr><td>身份</td><td>5 个角色有独立名字和头像</td></tr>
+              <tr><td>可见性</td><td>所有派活、汇报、总结都在 Issue 里</td></tr>
+              <tr><td>安全</td><td>只有授权人类能开启写入；AI 不能自我授权；最终以 open PR 等待人类 review/merge，不自动合并</td></tr>
+              <tr><td>质量</td><td>测试真实执行；关键功能通过验收</td></tr>
+              <tr><td>可用性</td><td>新人能看懂每条评论在做什么</td></tr>
+              <tr><td>语言</td><td>中文 Issue 用中文评论，英文 Issue 用英文评论</td></tr>
+              <tr><td>可审计</td><td>每个任务有派工单、汇报、提交、测试证据</td></tr>
+              <tr><td>成本</td><td>能显示每个角色的消耗/时间；有预算上限</td></tr>
+              <tr><td>可靠性</td><td>失败有汇报、有重试、有终止条件</td></tr>
+              <tr><td>可扩展性</td><td>角色、模板、仓库/任务参数以配置形式保存，A 跑通后能扩展为 B</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="s11">
+        <div class="sec-head"><span class="sec-num">11</span><h2>失败场景与处理</h2></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>场景</th><th>怎么发现</th><th>怎么处理</th><th>谁处理</th></tr></thead>
+            <tbody>
+              <tr><td>专家没被触发</td><td>长时间没有新评论</td><td>检查 @ 是否在正文段落；重新 @</td><td>人类/项目经理</td></tr>
+              <tr><td>专家卡住</td><td>汇报“阻塞”</td><td>项目经理调整任务或请人类介入</td><td>项目经理</td></tr>
+              <tr><td>测试失败</td><td>测试报告失败</td><td>项目经理派返工</td><td>项目经理</td></tr>
+              <tr><td>需求不清</td><td>专家提问</td><td>项目经理澄清或请人类裁决</td><td>项目经理/人类</td></tr>
+              <tr><td>两个角色改同一文件</td><td>提交冲突</td><td>暂停并行，改为串行</td><td>项目经理</td></tr>
+              <tr><td>接力死循环</td><td>轮数超过上限</td><td>停止，输出进度，请人类介入</td><td>项目经理</td></tr>
+              <tr><td>成本超限</td><td>达到预算上限</td><td>停止，请人类确认</td><td>项目经理/人类</td></tr>
+              <tr><td>权限不足</td><td>写操作被拒绝</td><td>请人类检查授权</td><td>人类</td></tr>
+              <tr><td>评论超过 100 条</td><td>平台不再触发</td><td>开新 Issue 或做阶段总结</td><td>人类/项目经理</td></tr>
+              <tr><td>AI 伪造测试</td><td>测试结果无证据</td><td>要求提供运行日志/截图；重新执行</td><td>项目经理/人类</td></tr>
+              <tr><td>密钥泄露</td><td>评论/代码出现敏感信息</td><td>立即停止、删除、轮换密钥</td><td>人类</td></tr>
+              <tr><td>误改主分支</td><td>分支保护告警</td><td>回滚，改为开发分支</td><td>人类</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="s12">
+        <div class="sec-head"><span class="sec-num">12</span><h2>非功能性需求</h2></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>需求</th><th>说明</th></tr></thead>
+            <tbody>
+              <tr><td>透明</td><td>每一步都能在 Issue 里看到</td></tr>
+              <tr><td>可审计</td><td>派工单、汇报、提交、测试都有记录</td></tr>
+              <tr><td>可复现</td><td>模板固定，换一个项目也能照着跑</td></tr>
+              <tr><td>成本可见</td><td>每个角色的时间/消耗可见，有预算上限</td></tr>
+              <tr><td>异步</td><td>人类不需要一直盯着，AI 完成后会评论</td></tr>
+              <tr><td>可扩展</td><td>从 2 个角色扩展到 5 个，不推翻流程</td></tr>
+              <tr><td>语言</td><td>评论跟随 Issue 主体语言；代码/接口名保持英文</td></tr>
+              <tr><td>可访问性</td><td>截图有说明，评论结构清晰</td></tr>
+              <tr><td>可靠性</td><td>失败有汇报、有重试、有终止条件</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="s13">
+        <div class="sec-head"><span class="sec-num">13</span><h2>开放问题（需要确认）</h2></div>
+        <p>以下问题已在 0.1 节确认，不再重复：交付目标（先 A 后 B）、权限强制范围、人工介入方式、成本上限、自动合并、分支策略、语言、数据库/联调/集成测试。</p>
+        <ol class="questions">
+          <li>谁有资格开启写入权限？只有仓库 Owner，还是 Admin 也可以？</li>
+          <li>项目经理在拆任务前，是否必须先问澄清问题？</li>
+          <li>一条评论最多同时派几个角色？建议 3 个以内。</li>
+          <li>Stage 2 默认使用参考案例中的制度图片，是否可行？如果不行，图片由谁提供？</li>
+          <li>评论超过 100 条时，是开新 Issue 还是继续在当前 Issue 做阶段总结？</li>
+        </ol>
+      </section>
+
+      <section id="s14">
+        <div class="sec-head"><span class="sec-num">14</span><h2>模板附录</h2></div>
+
+        <h3>14.1 人类发起 Issue 的模板</h3>
+        <pre class="template">## 目标
+……
+
+## 背景
+……
+
+## 交付物
+……
+
+## 约束
+……
+
+## 验收标准
+1. ……
+2. ……
+
+## 权限
+已开启写入权限，允许 AI 在指定目录内修改代码、提交到开发分支。
+
+@项目经理 请拆解任务并分配给合适的角色。</pre>
+
+        <h3>14.2 派工单模板</h3>
+        <pre class="template">@角色名 请执行 T{编号}。
+
+【目标】
+……
+
+【背景】
+……
+
+【范围】
+只能修改：……
+
+【交付物】
+……
+
+【分支】
+……
+
+【验收标准】
+1. ……
+2. ……
+
+【约束】
+- 不修改范围外文件
+- 不直接改主分支
+- 不泄露密钥
+- 阻塞立即汇报
+
+【完成后】
+请 @项目经理 汇报。</pre>
+
+        <h3>14.3 汇报模板</h3>
+        <pre class="template">@项目经理 T{编号} 汇报。
+
+【状态】完成 / 部分完成 / 阻塞
+【做了什么】……
+【改动文件】……
+【分支与提交】……
+【自测结果】……
+【证据】……
+【阻塞与风险】……
+【下一步】……</pre>
+
+        <h3>14.4 进度表模板</h3>
+        <pre class="template">| 编号 | 任务 | 负责 | 优先级 | 依赖 | 状态 | 证据 |
+|---|---|---|---|---|---|---|
+| T1 | …… | …… | P0 | 无 | 待开始 | - |</pre>
+
+        <h3>14.5 最终总结模板</h3>
+        <pre class="template">## 项目总结
+
+### 目标与结果
+……
+
+### 任务完成表
+| 编号 | 任务 | 负责 | 状态 |
+|---|---|---|---|
+
+### 交付物
+……
+
+### 提交记录
+……
+
+### 测试结果
+……
+
+### 如何运行
+……
+
+### 已知问题
+……
+
+### 请人类确认
+……</pre>
+      </section>
+
+      <section id="s15">
+        <div class="sec-head"><span class="sec-num">15</span><h2>下一步</h2></div>
+        <div class="next-grid">
+          <div class="next-card"><span class="num">STEP 1</span><strong>确认需求</strong><p>确认本文的目标、流程、验收标准。</p></div>
+          <div class="next-card"><span class="num">STEP 2</span><strong>技术设计</strong><p>根据确认结果编写技术设计，不在本文范围。</p></div>
+          <div class="next-card"><span class="num">STEP 3</span><strong>先 A 后 B</strong><p>先跑小任务和完整访客系统，A 跑通后再扩展为 B。</p></div>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="shell">
+    <span><strong>AI 团队协作需求文档</strong> · v0.2 · 待确认</span>
+    <span>只讲需求与流程，不涉及技术实现。</span>
+  </div>
+</footer>
