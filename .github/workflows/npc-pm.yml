@@ -1,0 +1,41 @@
+name: NPC PM
+on:
+  issue_comment:
+    types: [created]
+  repository_dispatch:
+    types: [npc-pm]
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+concurrency:
+  group: npc-issue-${{ github.event.issue.number || github.event.client_payload.issue }}
+  cancel-in-progress: false
+
+jobs:
+  pm:
+    if: |
+      (github.event_name == 'issue_comment' && github.event.comment.user.type == 'User' && contains(github.event.comment.body, '@npc-pm')) ||
+      (github.event_name == 'repository_dispatch' && github.event.action == 'npc-pm')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event_name == 'repository_dispatch' && github.event.client_payload.branch || github.event.repository.default_branch }}
+          persist-credentials: false
+      - uses: ./.github/actions/npc-agent
+        with:
+          app-id: ${{ secrets.NPC_PM_APP_ID }}
+          private-key: ${{ secrets.NPC_PM_PRIVATE_KEY }}
+          role-slug: npc-pm
+          role-prompt: .github/npc/roles/pm.md
+          allowed-tools: "Bash(git:*),Bash(gh:*),Bash(npm:*),Read,Write,Edit,Glob,Grep"
+          issue-number: ${{ github.event.issue.number || github.event.client_payload.issue }}
+          trigger-comment: ${{ github.event.comment.body || format('NPC report for issue #{0}', github.event.client_payload.issue) }}
+          branch: ${{ github.event.client_payload.branch || format('ai-npcs/issue-{0}', github.event.issue.number) }}
+          ensure-branch-pr: "true"
+          gate: "true"
+          gate-mode: ${{ github.event_name == 'repository_dispatch' && 'write' || 'start' }}
+          claude-token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}

@@ -33,6 +33,14 @@ inputs:
   claude-token:
     description: CLAUDE_CODE_OAUTH_TOKEN
     required: true
+  gate:
+    description: Check the start/write gate before running
+    required: false
+    default: "false"
+  gate-mode:
+    description: start or write
+    required: false
+    default: "start"
 
 runs:
   using: composite
@@ -63,6 +71,34 @@ runs:
         gh auth setup-git
         git config user.name "${ROLE_SLUG}[bot]"
         git config user.email "${APP_ID}+${ROLE_SLUG}[bot]@users.noreply.github.com"
+
+    - name: Check start gate
+      if: inputs.gate == 'true'
+      shell: bash
+      env:
+        GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        ISSUE_NUMBER: ${{ inputs.issue-number }}
+        COMMENT_BODY: ${{ github.event.comment.body || '' }}
+        AUTHOR_ASSOCIATION: ${{ github.event.comment.author_association || '' }}
+        ISSUE_LABELS: ${{ join(github.event.issue.labels.*.name, ',') }}
+        GATE_MODE: ${{ inputs.gate-mode }}
+      run: |
+        if [ -z "$ISSUE_LABELS" ]; then
+          ISSUE_LABELS=$(gh issue view "$ISSUE_NUMBER" --json labels --jq '.labels[].name' | paste -sd, -)
+          export ISSUE_LABELS
+        fi
+        set +e
+        if [ "$GATE_MODE" = "write" ]; then
+          RESULT=$(node scripts/gate.mjs --write)
+        else
+          RESULT=$(node scripts/gate.mjs)
+        fi
+        STATUS=$?
+        echo "$RESULT"
+        if [ $STATUS -ne 0 ]; then
+          gh issue comment "$ISSUE_NUMBER" --body "AI NPC 启动被拒：需要仓库 Owner/Member/Collaborator 添加 \`npc-work-mode\` 标签，并在正文段落中 @npc-pm。"
+          exit 1
+        fi
 
     - name: Ensure Issue branch and draft PR
       if: inputs.ensure-branch-pr == 'true'
