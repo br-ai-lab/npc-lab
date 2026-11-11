@@ -1,0 +1,84 @@
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+import { pathToFileURL } from "node:url";
+import { TEAM, validateTeam } from "./team.mjs";
+
+const STAGE1_SLUGS = new Set(["npc-pm", "npc-java"]);
+const TEMPLATES = ["work-order.md", "report.md", "status.md", "final-summary.md"];
+const FORBIDDEN_MERGE_COMMANDS = ["gh pr merge", "auto-merge", "--auto"];
+
+function read(root, relativePath) {
+  const path = join(root, relativePath);
+  return existsSync(path) ? readFileSync(path, "utf8") : null;
+}
+
+export function verifyConfig(root = process.cwd()) {
+  const problems = [];
+
+  const packageJson = read(root, "package.json");
+  if (packageJson === null) {
+    problems.push("package.json missing");
+  } else {
+    try {
+      const data = JSON.parse(packageJson);
+      if (data.type !== "module") problems.push('package.json must set "type": "module"');
+    } catch {
+      problems.push("package.json is not valid JSON");
+    }
+  }
+
+  try {
+    validateTeam();
+  } catch (error) {
+    problems.push(error.message);
+  }
+
+  for (const role of TEAM) {
+    if (!existsSync(join(root, role.promptPath))) problems.push(`missing prompt: ${role.promptPath}`);
+    if (!existsSync(join(root, role.skillPath))) problems.push(`missing skill: ${role.skillPath}`);
+  }
+
+  for (const slug of STAGE1_SLUGS) {
+    const relativePath = `.github/workflows/${slug}.yml`;
+    const workflow = read(root, relativePath);
+    if (workflow === null) {
+      problems.push(`missing workflow: ${relativePath}`);
+      continue;
+    }
+    if (!workflow.includes("github.event.comment.user.type == 'User'")) {
+      problems.push(`${relativePath}: missing human-only comment gate`);
+    }
+    if (!workflow.includes("claude-token")) {
+      problems.push(`${relativePath}: missing claude-token input`);
+    }
+    for (const command of FORBIDDEN_MERGE_COMMANDS) {
+      if (workflow.includes(command)) {
+        problems.push(`${relativePath}: forbidden merge command ${command}`);
+      }
+    }
+  }
+
+  const action = read(root, ".github/actions/npc-agent/action.yml");
+  if (action === null) {
+    problems.push("missing composite action");
+  } else if (!action.includes("actions/create-github-app-token")) {
+    problems.push("composite action missing create-github-app-token");
+  }
+
+  for (const template of TEMPLATES) {
+    if (!existsSync(join(root, ".github/npc/templates", template))) {
+      problems.push(`missing template: ${template}`);
+    }
+  }
+
+  return problems;
+}
+
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+  const problems = verifyConfig(process.cwd());
+  if (problems.length > 0) {
+    for (const problem of problems) console.error(problem);
+    process.exit(1);
+  }
+  console.log("config ok");
+}
