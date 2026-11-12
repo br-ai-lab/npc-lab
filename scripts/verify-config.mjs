@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 import { TEAM, validateTeam } from "./team.mjs";
 
-const STAGE1_SLUGS = new Set(["npc-pm", "npc-java"]);
+const ROLE_SLUGS = TEAM.map((role) => role.slug);
 const TEMPLATES = ["work-order.md", "report.md", "status.md", "final-summary.md"];
 const FORBIDDEN_MERGE_COMMANDS = ["gh pr merge", "auto-merge", "--auto"];
 
@@ -38,7 +38,7 @@ export function verifyConfig(root = process.cwd()) {
     if (!existsSync(join(root, role.skillPath))) problems.push(`missing skill: ${role.skillPath}`);
   }
 
-  for (const slug of STAGE1_SLUGS) {
+  for (const slug of ROLE_SLUGS) {
     const relativePath = `.github/workflows/${slug}.yml`;
     const workflow = read(root, relativePath);
     if (workflow === null) {

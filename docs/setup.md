@@ -34,6 +34,8 @@ Stage 1 需要两个 App：`npc-pm` 和 `npc-java`。**App 名称必须与角色
    - **Homepage URL**：填你的仓库地址，例如 `https://github.com/br-ai-lab/npc-lab`
      - 两个 App 可以填同一个 URL；它只是 App 的介绍页，不影响 NPC 身份。
      - NPC 的身份由 **GitHub App name**（`npc-pm` / `npc-java`）决定，不是 Homepage URL。
+
+> **为什么两个 App 可以共用同一个 Homepage URL？** Homepage URL 只是介绍页，不参与运行。区分角色的是 App 名称/slug、App ID/private key、对应 workflow 和 role prompt。两个 App 都安装到同一个 `npc-lab` 仓库，是因为它们要在同一个 Issue 里协作，不是因为它们是同一个角色。
    - **Webhook**：取消勾选 **Active**
 3. **Repository permissions** 设置为：
    - **Contents**：Read and write
@@ -210,19 +212,30 @@ node scripts/verify-config.mjs
 
 ## 9. Stage 2 再补三个 App
 
-Stage 2 需要再加：
+Stage 2 需要再加三个 App：
 
-- `npc-ocr`
-- `npc-react`
-- `npc-qa`
+| App 名称 | 角色 | Workflow | Secrets |
+|---|---|---|---|
+| `npc-ocr` | OCR / 文档 | `.github/workflows/npc-ocr.yml` | `NPC_OCR_APP_ID` / `NPC_OCR_PRIVATE_KEY` |
+| `npc-react` | React 前端 | `.github/workflows/npc-react.yml` | `NPC_REACT_APP_ID` / `NPC_REACT_PRIVATE_KEY` |
+| `npc-qa` | 测试 | `.github/workflows/npc-qa.yml` | `NPC_QA_APP_ID` / `NPC_QA_PRIVATE_KEY` |
 
-对每个重复第 2 步和第 3 步，Secret 名分别为：
+对每个 App 重复第 2 步和第 3 步：
 
-- `NPC_OCR_APP_ID` / `NPC_OCR_PRIVATE_KEY`
-- `NPC_REACT_APP_ID` / `NPC_REACT_PRIVATE_KEY`
-- `NPC_QA_APP_ID` / `NPC_QA_PRIVATE_KEY`
+- App 名称必须完全一致；
+- 权限同样是 Contents rw、Issues rw、Pull requests rw、Metadata r；
+- 安装到 `npc-lab`；
+- 生成 private key，填到对应 Secret。
 
-Stage 2 的 workflow 会在任务 12 创建。
+Stage 2 的 workflow 已经在本仓库创建；推送/合并到 `main` 后即可使用。
+
+另外，Stage 2 还需要把《公司访客管理制度》图片放到：
+
+```text
+assets/公司访客管理制度.png
+```
+
+然后创建完整访客系统 Issue，加 `npc-work-mode` 标签，发评论 `@npc-pm ...`。
 
 ## 常见问题
 
