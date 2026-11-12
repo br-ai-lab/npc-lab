@@ -1,0 +1,22 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: visitor-management
+  datasource:
+    # Relative paths resolve from the directory the app is started in. Running
+    # `cd backend && mvn spring-boot:run` therefore uses backend/data/visitor.db.
+    url: jdbc:sqlite:${VISITOR_DB_PATH:data/visitor.db}
+    driver-class-name: org.sqlite.JDBC
+  sql:
+    init:
+      mode: always
+      schema-locations: classpath:schema.sql
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+
+logging:
+  level:
+    root: INFO
