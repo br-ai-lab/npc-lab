@@ -50,7 +50,7 @@ test("requires one auth credential", () => {
 
 test("handoff commands pull before push", () => {
   const commands = handoffCommands({ issue: 5, branch: "ai-npcs/issue-5", count: 2 });
-  assert.match(commands[0], /git pull --rebase/);
+  assert.match(commands[0], /git pull --rebase --autostash/);
   assert.ok(commands.includes("git push"));
   assert.ok(commands.findIndex((c) => c.includes("git pull --rebase")) < commands.indexOf("git push"));
 });
