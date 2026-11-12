@@ -45,11 +45,13 @@ Stage 1 需要两个 App：`npc-pm` 和 `npc-java`。**App 名称必须与角色
      - 个人账号：打开 `https://github.com/settings/apps`，点 `npc-pm` 或 `npc-java`
      - 组织：打开 `https://github.com/organizations/br-ai-lab/settings/apps`，点对应 App
    - App 设置页的 URL 形如 `https://github.com/settings/apps/npc-pm` 或 `https://github.com/organizations/br-ai-lab/settings/apps/npc-pm`。
-7. 在同一个 **General** 设置页，向下滚动到 **Private keys** 区域（通常在页面靠下，和 **Client secrets**、**Webhook** 在同一组）。点击 **Generate a private key**。
-   - 浏览器会立刻下载一个 `.pem` 文件，文件名类似 `npc-pm.2026-11-12.private-key.pem`，一般在你电脑的“下载/Downloads”文件夹。
-   - GitHub 不会再次显示这个私钥；如果丢了，只能点 **Generate a private key** 重新生成，然后更新对应的 GitHub Secret。
+7. 看左侧菜单，点击 **Credentials**，再点击 **Key pairs**。私钥不在 General 页面里。
+8. 点击 **New key**。浏览器会立刻下载一个 `.pem` 文件，文件名类似 `npc-pm.2026-11-12.private-key.pem`，一般在你电脑的“下载/Downloads”文件夹。
+   - GitHub 不会再次显示这个私钥；如果丢了，只能点 **New key** 重新生成，然后更新对应的 GitHub Secret。
    - 不要把这个 `.pem` 文件提交到仓库，也不要发到聊天里。
-8. 点击 **Install App**，选择 **Only select repositories** → `npc-lab` → **Install**。
+9. 点击 **Install App**，选择 **Only select repositories** → `npc-lab` → **Install**。
+
+> 2026 年的 GitHub UI 把私钥放在 **Credentials → Key pairs → New key**。如果你看到的是旧版界面，入口可能是页面底部的 **Private keys → Generate a private key**，两者是同一个东西。
 
 > 私有 key 只显示/下载一次。丢了就重新生成，并更新对应的 GitHub Secret。
 
