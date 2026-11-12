@@ -140,6 +140,11 @@ runs:
       shell: bash
       env:
         GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        GIT_EDITOR: "true"
+        GIT_TERMINAL_PROMPT: "0"
+        CI: "true"
+        NO_COLOR: "1"
+        npm_config_yes: "true"
         CLAUDE_CODE_OAUTH_TOKEN: ${{ inputs.claude-token }}
         ANTHROPIC_AUTH_TOKEN: ${{ inputs.anthropic-auth-token }}
         ANTHROPIC_BASE_URL: ${{ inputs.anthropic-base-url }}

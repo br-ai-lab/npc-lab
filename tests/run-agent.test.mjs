@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildAgentEnv, buildUserPrompt, handoffCommands, parseAgentOutput } from "../scripts/run-agent.mjs";
+import { buildAgentEnv, buildUserPrompt, handoffCommands, parseAgentOutput, resolveNext } from "../scripts/run-agent.mjs";
 
 test("user prompt includes issue, branch, and trigger", () => {
   const text = buildUserPrompt({ issue: 4, branch: "ai-npcs/issue-4", triggerComment: "@npc-pm 请开始" });
@@ -44,4 +44,55 @@ test("handoff commands pull before push", () => {
   assert.match(commands[0], /git pull --rebase/);
   assert.ok(commands.includes("git push"));
   assert.ok(commands.findIndex((c) => c.includes("git pull --rebase")) < commands.indexOf("git push"));
+});
+
+test("uses stdout NEXT when present", async () => {
+  let called = false;
+  const result = await resolveNext({
+    text: "done\nNEXT:npc-java",
+    issue: 5,
+    roleSlug: "npc-pm",
+    run: async () => {
+      called = true;
+      return "[]";
+    },
+  });
+  assert.deepEqual(result, { roles: ["npc-java"] });
+  assert.equal(called, false);
+});
+
+test("falls back to the latest role comment", async () => {
+  const comments = JSON.stringify([
+    { user: { login: "npc-pm[bot]" }, body: "work order\nNEXT:npc-java,npc-react" },
+  ]);
+  const result = await resolveNext({
+    text: "posted",
+    issue: 5,
+    roleSlug: "npc-pm",
+    run: async () => comments,
+  });
+  assert.deepEqual(result, { roles: ["npc-java", "npc-react"] });
+});
+
+test("prefers the comment when stdout says NEXT:none", async () => {
+  const comments = JSON.stringify([
+    { user: { login: "npc-pm[bot]" }, body: "work order\nNEXT:npc-java" },
+  ]);
+  const result = await resolveNext({
+    text: "posted\nNEXT:none",
+    issue: 5,
+    roleSlug: "npc-pm",
+    run: async () => comments,
+  });
+  assert.deepEqual(result, { roles: ["npc-java"] });
+});
+
+test("returns missing-next when neither stdout nor comment has NEXT", async () => {
+  const result = await resolveNext({
+    text: "posted",
+    issue: 5,
+    roleSlug: "npc-pm",
+    run: async () => "[]",
+  });
+  assert.deepEqual(result, { roles: [], error: "missing-next" });
 });
