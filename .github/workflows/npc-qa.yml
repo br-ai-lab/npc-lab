@@ -1,7 +1,5 @@
 name: NPC QA
 on:
-  issue_comment:
-    types: [created]
   repository_dispatch:
     types: [npc-qa]
 
@@ -16,9 +14,7 @@ concurrency:
 
 jobs:
   qa:
-    if: |
-      (github.event_name == 'issue_comment' && github.event.comment.user.type == 'User' && contains(github.event.comment.body, '@npc-qa')) ||
-      (github.event_name == 'repository_dispatch' && github.event.action == 'npc-qa')
+    if: github.event_name == 'repository_dispatch' && github.event.action == 'npc-qa'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -44,11 +40,11 @@ jobs:
           role-prompt: .github/npc/roles/qa.md
           allowed-tools: "Bash(git:*),Bash(gh:*),Bash(npm:*),Bash(npx:*),Bash(mvn:*),Bash(java:*),Bash(curl:*),Bash(cd:*),Bash(timeout:*),Bash(node:*),Bash(ls:*),Bash(cat:*),Bash(grep:*),Bash(find:*),Bash(mkdir:*),Bash(cp:*),Bash(mv:*),Bash(sed:*),Bash(head:*),Bash(tail:*),Bash(wc:*),Bash(pwd:*),Bash(echo:*),Bash(test:*),Read,Write,Edit,Glob,Grep"
           issue-number: ${{ github.event.issue.number || github.event.client_payload.issue }}
-          trigger-comment: ${{ github.event.comment.body || format('NPC report for issue {0}', github.event.client_payload.issue) }}
+          trigger-comment: ${{ format('NPC report for issue {0}', github.event.client_payload.issue) }}
           branch: ${{ github.event.client_payload.branch || format('ai-npcs/issue-{0}', github.event.issue.number) }}
           ensure-branch-pr: "false"
           gate: "true"
-          gate-mode: ${{ github.event_name == 'repository_dispatch' && 'write' || 'start' }}
+          gate-mode: "write"
           claude-token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           anthropic-auth-token: ${{ secrets.ANTHROPIC_AUTH_TOKEN }}
           anthropic-base-url: ${{ secrets.ANTHROPIC_BASE_URL }}
