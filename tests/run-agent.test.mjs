@@ -15,6 +15,15 @@ test("parses the JSON result and cost", () => {
   assert.deepEqual(parseAgentOutput(stdout), { text: "done\nNEXT:npc-pm", costUsd: 0.42 });
 });
 
+test("parses a stream-json result line", () => {
+  const stdout = [
+    JSON.stringify({ type: "system", subtype: "init" }),
+    JSON.stringify({ type: "assistant", message: { content: [{ type: "text", text: "working" }] } }),
+    JSON.stringify({ type: "result", result: "done\nNEXT:npc-java", total_cost_usd: 0.12 }),
+  ].join("\n");
+  assert.deepEqual(parseAgentOutput(stdout), { text: "done\nNEXT:npc-java", costUsd: 0.12 });
+});
+
 test("drops empty auth env vars and keeps the provided one", () => {
   const env = buildAgentEnv({
     ANTHROPIC_AUTH_TOKEN: "",
