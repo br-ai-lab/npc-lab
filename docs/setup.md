@@ -159,6 +159,8 @@ GitHub 现在推荐用 **Rulesets**（**Settings → Rules → Rulesets**）；�
 - Target branches：包含 `main`（或 `~DEFAULT_BRANCH`）
 - Enforcement：**Active**（不是 Evaluate / Disabled）
 
+> 如果页面显示 **“Applies to 0 targets”**，说明规则没有匹配任何分支，等于没开。必须点 **Add target** → **Include default branch**，或 **Include by pattern** 填 `main`。
+
 ### 必须开启
 
 - **Require a pull request before merging**：ON
@@ -171,6 +173,7 @@ GitHub 现在推荐用 **Rulesets**（**Settings → Rules → Rulesets**）；�
 
 ### 建议关闭
 
+- **Restrict creations / Restrict updates**：OFF。开了且 Bypass list 为空时，可能连 PR 合并都被挡住；`Require a pull request` 已经够用。
 - **Require status checks to pass**：OFF（目前没有配置 status checks；开了会挡住 PR）
 - **Require signed commits**：OFF（NPC 用 App 身份提交，可能不是签名提交）
 - **Require linear history**：可选
