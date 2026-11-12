@@ -91,6 +91,15 @@ function writeHandoff(issue, count) {
   writeFileSync(`${dir}/handoff.json`, `${JSON.stringify({ count }, null, 2)}\n`, "utf8");
 }
 
+export function handoffCommands({ issue, branch, count }) {
+  return [
+    `git pull --rebase origin ${branch}`,
+    `git add .npc/issue-${issue}/handoff.json`,
+    `git commit -m "chore: handoff ${count} for issue ${issue}"`,
+    "git push",
+  ];
+}
+
 function run(cmd) {
   return execSync(cmd, {
     encoding: "utf8",
@@ -161,11 +170,16 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
 
   writeHandoff(issue, handoff.count + 1);
   try {
-    run(`git add .npc/issue-${issue}/handoff.json`);
-    run(`git commit -m "chore: handoff ${handoff.count + 1} for issue ${issue}"`);
-    run("git push");
+    for (const command of handoffCommands({ issue, branch, count: handoff.count + 1 })) {
+      run(command);
+    }
   } catch (error) {
-    console.error(`handoff commit skipped: ${error.message}`);
+    try {
+      run(`git pull --rebase origin ${branch}`);
+      run("git push");
+    } catch (retryError) {
+      console.error(`handoff commit skipped: ${retryError.message}`);
+    }
   }
 
   if (costUsd > COST_LIMIT_USD) {

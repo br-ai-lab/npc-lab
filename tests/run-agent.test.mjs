@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildAgentEnv, buildUserPrompt, parseAgentOutput } from "../scripts/run-agent.mjs";
+import { buildAgentEnv, buildUserPrompt, handoffCommands, parseAgentOutput } from "../scripts/run-agent.mjs";
 
 test("user prompt includes issue, branch, and trigger", () => {
   const text = buildUserPrompt({ issue: 4, branch: "ai-npcs/issue-4", triggerComment: "@npc-pm 请开始" });
@@ -37,4 +37,11 @@ test("keeps an anthropic auth token and base url", () => {
 
 test("requires one auth credential", () => {
   assert.throws(() => buildAgentEnv({}), /auth/i);
+});
+
+test("handoff commands pull before push", () => {
+  const commands = handoffCommands({ issue: 5, branch: "ai-npcs/issue-5", count: 2 });
+  assert.match(commands[0], /git pull --rebase/);
+  assert.ok(commands.includes("git push"));
+  assert.ok(commands.findIndex((c) => c.includes("git pull --rebase")) < commands.indexOf("git push"));
 });
