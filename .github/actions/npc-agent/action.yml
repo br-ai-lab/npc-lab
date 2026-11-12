@@ -31,8 +31,33 @@ inputs:
     required: false
     default: "false"
   claude-token:
-    description: CLAUDE_CODE_OAUTH_TOKEN
-    required: true
+    description: CLAUDE_CODE_OAUTH_TOKEN (optional if using ANTHROPIC_AUTH_TOKEN)
+    required: false
+    default: ""
+  anthropic-auth-token:
+    description: ANTHROPIC_AUTH_TOKEN
+    required: false
+    default: ""
+  anthropic-base-url:
+    description: ANTHROPIC_BASE_URL
+    required: false
+    default: ""
+  anthropic-model:
+    description: ANTHROPIC_MODEL
+    required: false
+    default: ""
+  anthropic-default-opus-model:
+    description: ANTHROPIC_DEFAULT_OPUS_MODEL
+    required: false
+    default: ""
+  anthropic-default-sonnet-model:
+    description: ANTHROPIC_DEFAULT_SONNET_MODEL
+    required: false
+    default: ""
+  anthropic-default-haiku-model:
+    description: ANTHROPIC_DEFAULT_HAIKU_MODEL
+    required: false
+    default: ""
   gate:
     description: Check the start/write gate before running
     required: false
@@ -116,6 +141,12 @@ runs:
       env:
         GH_TOKEN: ${{ steps.app-token.outputs.token }}
         CLAUDE_CODE_OAUTH_TOKEN: ${{ inputs.claude-token }}
+        ANTHROPIC_AUTH_TOKEN: ${{ inputs.anthropic-auth-token }}
+        ANTHROPIC_BASE_URL: ${{ inputs.anthropic-base-url }}
+        ANTHROPIC_MODEL: ${{ inputs.anthropic-model }}
+        ANTHROPIC_DEFAULT_OPUS_MODEL: ${{ inputs.anthropic-default-opus-model }}
+        ANTHROPIC_DEFAULT_SONNET_MODEL: ${{ inputs.anthropic-default-sonnet-model }}
+        ANTHROPIC_DEFAULT_HAIKU_MODEL: ${{ inputs.anthropic-default-haiku-model }}
         ROLE_SLUG: ${{ inputs.role-slug }}
         ROLE_PROMPT: ${{ inputs.role-prompt }}
         ALLOWED_TOOLS: ${{ inputs.allowed-tools }}

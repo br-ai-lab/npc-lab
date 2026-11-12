@@ -32,6 +32,32 @@ export function parseAgentOutput(stdout) {
   }
 }
 
+const AUTH_ENV_KEYS = [
+  "ANTHROPIC_AUTH_TOKEN",
+  "ANTHROPIC_BASE_URL",
+  "ANTHROPIC_MODEL",
+  "ANTHROPIC_DEFAULT_OPUS_MODEL",
+  "ANTHROPIC_DEFAULT_SONNET_MODEL",
+  "ANTHROPIC_DEFAULT_HAIKU_MODEL",
+  "CLAUDE_CODE_OAUTH_TOKEN",
+];
+
+export function buildAgentEnv(baseEnv = process.env) {
+  const env = { ...baseEnv };
+  for (const key of AUTH_ENV_KEYS) {
+    if (!env[key] || String(env[key]).trim() === "") delete env[key];
+  }
+
+  if (!env.ANTHROPIC_AUTH_TOKEN && !env.CLAUDE_CODE_OAUTH_TOKEN) {
+    throw new Error("missing auth: set ANTHROPIC_AUTH_TOKEN or CLAUDE_CODE_OAUTH_TOKEN");
+  }
+  if (env.ANTHROPIC_AUTH_TOKEN && !env.ANTHROPIC_BASE_URL) {
+    console.warn("ANTHROPIC_AUTH_TOKEN is set without ANTHROPIC_BASE_URL; using the default endpoint");
+  }
+
+  return env;
+}
+
 export async function dispatchNext({ role, issue, branch, run }) {
   const target = typeof role === "string" ? getRole(role) : role;
   if (!target) throw new Error(`unknown role: ${String(role)}`);
@@ -113,7 +139,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
       "--output-format",
       "json",
     ],
-    { encoding: "utf8", maxBuffer: 50 * 1024 * 1024 },
+    { encoding: "utf8", maxBuffer: 50 * 1024 * 1024, env: buildAgentEnv(process.env) },
   );
 
   const stdout = result.stdout ?? "";

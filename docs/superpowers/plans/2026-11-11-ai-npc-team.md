@@ -19,6 +19,7 @@
 - PR 保持 draft/open，直到人类合并。不自动合并。不直接推 `main`。
 - 人类添加 `npc-work-mode` 标签并评论 `@npc-pm` 来启动；只有 `OWNER`、`MEMBER`、`COLLABORATOR` 可以启动。
 - 所有写操作都用该角色自己的 GitHub App 安装令牌；评论、提交、PR、dispatch 一律不用 `GITHUB_TOKEN`。
+- 模型认证二选一：`CLAUDE_CODE_OAUTH_TOKEN`，或 `ANTHROPIC_AUTH_TOKEN` + `ANTHROPIC_BASE_URL`（模型变量可选）。
 - 评论跟随 Issue 主体语言；代码、标识符、接口名保持英文。
 - 每个 Issue 最多 20 次接力。一条评论最多 3 个角色提及。单次完整运行预算上限 $10。
 - Agent 最后一行必须是 `NEXT:<role>` 或 `NEXT:none`。
@@ -607,7 +608,7 @@ test("parses the JSON result and cost", () => {
 
 - [ ] **步骤 7：写 `.github/actions/npc-agent/action.yml`**
 
-Use `actions/create-github-app-token@v1` with `app-id` and `private-key`, then `actions/setup-node@v4` with Node 22, then `npm install -g @anthropic-ai/claude-code`, then run `node scripts/run-agent.mjs`. Set `GH_TOKEN` to the App token, `CLAUDE_CODE_OAUTH_TOKEN` from the `claude-token` input, and `GIT_AUTHOR_NAME`/`GIT_AUTHOR_EMAIL`/`GIT_COMMITTER_NAME`/`GIT_COMMITTER_EMAIL` to the App bot identity (`<app-slug>[bot]`, `<app-id>+<app-slug>[bot]@users.noreply.github.com`). Run `gh auth setup-git` after setting `GH_TOKEN` so git pushes use the App token. If `ensure-branch-pr` is `true`, run `node scripts/ensure-branch-pr.mjs` before the agent. The action must expose the `claude-token` input and the workflows must pass `claude-token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}`.
+使用 `actions/create-github-app-token@v1`（传入 `app-id` 和 `private-key`），再用 `actions/setup-node@v4` 安装 Node 22，然后 `npm install -g @anthropic-ai/claude-code`，最后运行 `node scripts/run-agent.mjs`。把 `GH_TOKEN` 设为 App token；认证二选一：`CLAUDE_CODE_OAUTH_TOKEN` 来自 `claude-token` 输入，或 `ANTHROPIC_AUTH_TOKEN` + `ANTHROPIC_BASE_URL` 来自对应输入（模型变量可选）；把 `GIT_AUTHOR_NAME`/`GIT_AUTHOR_EMAIL`/`GIT_COMMITTER_NAME`/`GIT_COMMITTER_EMAIL` 设为 App bot 身份（`<app-slug>[bot]`、`<app-id>+<app-slug>[bot]@users.noreply.github.com`）。设置 `GH_TOKEN` 后运行 `gh auth setup-git`，让 git push 使用 App token。如果 `ensure-branch-pr` 为 `true`，在 Agent 之前运行 `node scripts/ensure-branch-pr.mjs`。Action 必须暴露 `claude-token` 和 `anthropic-auth-token` 输入，workflow 必须传入对应 secret。
 
 - [ ] **步骤 8：运行新测试**
 
@@ -817,8 +818,8 @@ CLI：打印每个问题，若有问题 `process.exit(1)`。
 包含以下精确步骤：
 1. 在 `br-ai-lab` 下创建一个仓库 `npc-lab`（Public 或 Private，见 `docs/setup.md` 的说明）。
 2. 创建 Stage 1 的 GitHub App：`npc-pm` 和 `npc-java`。每个都设置名称、主页，关闭 webhook；权限 Contents rw、Issues rw、Pull requests rw、Metadata r；安装到 `npc-lab`；生成私钥；记录 App ID。
-3. 添加仓库 secret：`NPC_PM_APP_ID`、`NPC_PM_PRIVATE_KEY`、`NPC_JAVA_APP_ID`、`NPC_JAVA_PRIVATE_KEY`、`CLAUDE_CODE_OAUTH_TOKEN`。
-4. 在本地运行 `claude setup-token`，把 token 粘贴到 `CLAUDE_CODE_OAUTH_TOKEN`。
+3. 添加仓库 secret：`NPC_PM_APP_ID`、`NPC_PM_PRIVATE_KEY`、`NPC_JAVA_APP_ID`、`NPC_JAVA_PRIVATE_KEY`，以及模型认证所需的 secret（`CLAUDE_CODE_OAUTH_TOKEN`，或 `ANTHROPIC_AUTH_TOKEN` + `ANTHROPIC_BASE_URL` + 模型变量）。
+4. 模型认证二选一：使用现有 `~/.claude/settings.json` 的 `ANTHROPIC_*` 值，或运行 `claude setup-token` 生成 OAuth token。详见 `docs/setup.md`。
 5. 创建标签 `npc-work-mode`（红色/橙色）。
 6. 保护 `main`：要求 pull request，关闭“dismiss stale approvals”，禁止直接 push，禁止自动合并。
 7. Stage 2 时：对 `npc-ocr`、`npc-react`、`npc-qa` 重复步骤 2–3。

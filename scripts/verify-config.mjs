@@ -51,6 +51,9 @@ export function verifyConfig(root = process.cwd()) {
     if (!workflow.includes("claude-token")) {
       problems.push(`${relativePath}: missing claude-token input`);
     }
+    if (!workflow.includes("anthropic-auth-token")) {
+      problems.push(`${relativePath}: missing anthropic-auth-token input`);
+    }
     for (const command of FORBIDDEN_MERGE_COMMANDS) {
       if (workflow.includes(command)) {
         problems.push(`${relativePath}: forbidden merge command ${command}`);

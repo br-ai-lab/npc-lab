@@ -43,3 +43,9 @@ jobs:
           gate: "true"
           gate-mode: ${{ github.event_name == 'repository_dispatch' && 'write' || 'start' }}
           claude-token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          anthropic-auth-token: ${{ secrets.ANTHROPIC_AUTH_TOKEN }}
+          anthropic-base-url: ${{ secrets.ANTHROPIC_BASE_URL }}
+          anthropic-model: ${{ secrets.ANTHROPIC_MODEL }}
+          anthropic-default-opus-model: ${{ secrets.ANTHROPIC_DEFAULT_OPUS_MODEL }}
+          anthropic-default-sonnet-model: ${{ secrets.ANTHROPIC_DEFAULT_SONNET_MODEL }}
+          anthropic-default-haiku-model: ${{ secrets.ANTHROPIC_DEFAULT_HAIKU_MODEL }}

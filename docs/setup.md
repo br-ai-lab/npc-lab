@@ -32,6 +32,8 @@ Stage 1 需要两个 App：`npc-pm` 和 `npc-java`。**App 名称必须与角色
 2. 填写：
    - **GitHub App name**：`npc-pm` 或 `npc-java`
    - **Homepage URL**：填你的仓库地址，例如 `https://github.com/br-ai-lab/npc-lab`
+     - 两个 App 可以填同一个 URL；它只是 App 的介绍页，不影响 NPC 身份。
+     - NPC 的身份由 **GitHub App name**（`npc-pm` / `npc-java`）决定，不是 Homepage URL。
    - **Webhook**：取消勾选 **Active**
 3. **Repository permissions** 设置为：
    - **Contents**：Read and write
@@ -51,6 +53,10 @@ Stage 1 需要两个 App：`npc-pm` 和 `npc-java`。**App 名称必须与角色
    - 不要把这个 `.pem` 文件提交到仓库，也不要发到聊天里。
 9. 点击 **Install App**，选择 **Only select repositories** → `npc-lab` → **Install**。
 
+> **Install App 页面列出的是“可以安装到的账号/组织”，不是 App 名称。** 看到 `br-ai-lab` 是对的：它表示把 `npc-pm` / `npc-java` 安装到 `br-ai-lab` 这个账号/组织下。点 `br-ai-lab` 旁边的 **Install**，再选择 `npc-lab` 仓库。
+>
+> 如果 `npc-lab` 还没创建，或者列表里看不到它，先回到第 1 步创建仓库，再刷新这个页面。
+
 > 2026 年的 GitHub UI 把私钥放在 **Credentials → Key pairs → New key**。如果你看到的是旧版界面，入口可能是页面底部的 **Private keys → Generate a private key**，两者是同一个东西。
 
 > 私有 key 只显示/下载一次。丢了就重新生成，并更新对应的 GitHub Secret。
@@ -65,21 +71,56 @@ Stage 1 需要两个 App：`npc-pm` 和 `npc-java`。**App 名称必须与角色
 | `NPC_PM_PRIVATE_KEY` | `npc-pm` 的 `.pem` 文件全文（包含 BEGIN/END 行） |
 | `NPC_JAVA_APP_ID` | `npc-java` 的 App ID |
 | `NPC_JAVA_PRIVATE_KEY` | `npc-java` 的 `.pem` 文件全文 |
-| `CLAUDE_CODE_OAUTH_TOKEN` | 下一步生成的 token |
+| `ANTHROPIC_AUTH_TOKEN` | `~/.claude/settings.json` 第 4 行的值 |
+| `ANTHROPIC_BASE_URL` | 同文件第 3 行的值 |
+| `ANTHROPIC_MODEL` | 同文件第 5 行的值 |
+| `ANTHROPIC_DEFAULT_OPUS_MODEL` | 同文件第 6 行的值 |
+| `ANTHROPIC_DEFAULT_SONNET_MODEL` | 同文件第 7 行的值 |
+| `ANTHROPIC_DEFAULT_HAIKU_MODEL` | 同文件第 8 行的值 |
+| `CLAUDE_CODE_OAUTH_TOKEN` | 可选：只有用方式 B 时才填 |
 
 > `.pem` 是文本文件。用 VS Code 或记事本打开它，全选复制，粘贴到对应的 Secret 值里。内容必须包含 `-----BEGIN RSA PRIVATE KEY-----` 和 `-----END RSA PRIVATE KEY-----` 两行，否则 App token 会创建失败。
 
-## 4. 生成 Claude Code token
+## 4. 配置模型认证（二选一）
 
-在你的电脑上打开终端，运行：
+### 方式 A：使用你现有的 ANTHROPIC_AUTH_TOKEN（推荐）
+
+你的 `~/.claude/settings.json` 里已经有：
+
+```json
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "<第 3 行>",
+    "ANTHROPIC_AUTH_TOKEN": "<第 4 行>",
+    "ANTHROPIC_MODEL": "<第 5 行>",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "<第 6 行>",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "<第 7 行>",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "<第 8 行>"
+  }
+}
+```
+
+1. 打开文件：
+
+   ```bash
+   code ~/.claude/settings.json
+   ```
+
+2. 把第 3–8 行的值复制到上面表格对应的 GitHub Secret。
+3. **不要运行 `claude setup-token`**；这种方式使用你现有的网关/代理认证。
+4. 不要把 token 粘贴到 Issue、代码或聊天里。
+
+### 方式 B：生成 Claude Code OAuth token
+
+如果你不想用方式 A，或者没有 `ANTHROPIC_AUTH_TOKEN`，可以运行：
 
 ```bash
 claude setup-token
 ```
 
-按提示在浏览器授权，复制生成的 token，粘贴到上表的 `CLAUDE_CODE_OAUTH_TOKEN`。
+按提示在浏览器授权，把生成的 token 填到 `CLAUDE_CODE_OAUTH_TOKEN`。
 
-> 这个 token 使用你的 Claude Code 订阅额度。不要把它写进代码或评论。
+> 如果 `claude setup-token` 提示“you already have authentication configured”，说明方式 A 已经配置好了；按 `Ctrl+C` 取消即可，不需要新 token。
 
 ## 5. 创建标签
 
@@ -153,6 +194,9 @@ Stage 2 的 workflow 会在任务 12 创建。
 
 ## 常见问题
 
+- **`claude setup-token` 提示 “you already have authentication configured”**：说明你已经配置了 `ANTHROPIC_AUTH_TOKEN` / `ANTHROPIC_BASE_URL`。用方式 A：把 `~/.claude/settings.json` 第 3–8 行的值填进 GitHub Secrets，然后取消 `setup-token`，不需要新 token。
+- **Workflow 报认证失败**：检查 `ANTHROPIC_AUTH_TOKEN` 和 `ANTHROPIC_BASE_URL` 是否都填了，值是否来自同一个 `~/.claude/settings.json`。
+- **Workflow 报 model not found**：把 `ANTHROPIC_MODEL`、`ANTHROPIC_DEFAULT_OPUS_MODEL`、`ANTHROPIC_DEFAULT_SONNET_MODEL`、`ANTHROPIC_DEFAULT_HAIKU_MODEL` 四个 Secret 也填上。
 - **App 名称和角色不一致**：git 提交身份会不对，评论也可能显示错。App 名称必须是 `npc-pm`、`npc-java`、`npc-ocr`、`npc-react`、`npc-qa`。
 - **Private key 粘贴不完整**：Secret 里必须包含 `-----BEGIN RSA PRIVATE KEY-----` 和 `-----END RSA PRIVATE KEY-----`。
 - **没有 `npc-work-mode` 标签**：NPC 只会评论，不会写代码。
