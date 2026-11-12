@@ -11,7 +11,7 @@ permissions:
   pull-requests: read
 
 concurrency:
-  group: npc-issue-${{ github.event.issue.number || github.event.client_payload.issue }}
+  group: npc-react-issue-${{ github.event.issue.number || github.event.client_payload.issue }}
   cancel-in-progress: false
 
 jobs:
