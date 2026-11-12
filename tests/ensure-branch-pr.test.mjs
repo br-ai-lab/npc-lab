@@ -26,6 +26,8 @@ test("is a no-op when the branch and PR already exist", async () => {
   };
   const result = await ensureBranchPr({ issue: 4, branch: "ai-npcs/issue-4", base: "main", run });
   assert.deepEqual(result, { branchCreated: false, prCreated: false });
+  assert.ok(calls.some((c) => c.includes("git fetch origin ai-npcs/issue-4")));
+  assert.ok(calls.some((c) => c.includes("git checkout -B ai-npcs/issue-4 FETCH_HEAD")));
   assert.ok(!calls.some((c) => c.includes("git push")));
   assert.ok(!calls.some((c) => c.includes("gh pr create")));
 });

@@ -23,7 +23,8 @@ export async function ensureBranchPr({ issue, branch, base = "main", run }) {
     await runner(`git push -u origin ${branch}`);
     branchCreated = true;
   } else {
-    await runner(`git checkout ${branch}`);
+    await runner(`git fetch origin ${branch}`);
+    await runner(`git checkout -B ${branch} FETCH_HEAD`);
   }
 
   const openPrs = await runner(`gh pr list --head ${branch} --state open --json number`);
