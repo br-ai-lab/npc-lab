@@ -33,7 +33,7 @@ jobs:
           role-prompt: .github/npc/roles/pm.md
           allowed-tools: "Bash(git:*),Bash(gh:*),Bash(npm:*),Read,Write,Edit,Glob,Grep"
           issue-number: ${{ github.event.issue.number || github.event.client_payload.issue }}
-          trigger-comment: ${{ github.event.comment.body || format('NPC report for issue #{0}', github.event.client_payload.issue) }}
+          trigger-comment: ${{ github.event.comment.body || format('NPC report for issue {0}', github.event.client_payload.issue) }}
           branch: ${{ github.event.client_payload.branch || format('ai-npcs/issue-{0}', github.event.issue.number) }}
           ensure-branch-pr: "true"
           gate: "true"

@@ -152,18 +152,50 @@ git push -u origin feat/ai-npc-team:main
 
 ## 7. 保护 `main`
 
-打开仓库 → **Settings → Branches → Add branch protection rule**：
+GitHub 现在推荐用 **Rulesets**（**Settings → Rules → Rulesets**）；旧的 **Branches** 页面也能用。两种方式都按下面的标准配置。
 
-- Branch name pattern：`main`
-- 勾选 **Require a pull request before merging**
-- 取消勾选 **Dismiss stale pull request approvals when new commits are pushed**（参考案例里没有强制 review）
-- 勾选 **Do not allow bypassing the above settings**（如果可用）
-- 不要开启 **Allow auto-merge**
-- 保存
+### 规则目标
+
+- Target branches：包含 `main`（或 `~DEFAULT_BRANCH`）
+- Enforcement：**Active**（不是 Evaluate / Disabled）
+
+> 如果页面显示 **“Applies to 0 targets”**，说明规则没有匹配任何分支，等于没开。必须点 **Add target** → **Include default branch**，或 **Include by pattern** 填 `main`。
+
+### 必须开启
+
+- **Require a pull request before merging**：ON
+  - **Required approvals**：**0**（自己实验时，填 1 会导致你无法批准自己的 PR）
+  - **Dismiss stale pull request approvals**：OFF
+  - **Require review from Code Owners**：OFF
+  - **Require approval of the most recent reviewable push**：OFF
+- **Block force pushes**：ON
+- **Restrict deletions**：ON
+
+### 建议关闭
+
+- **Restrict creations / Restrict updates**：OFF。开了且 Bypass list 为空时，可能连 PR 合并都被挡住；`Require a pull request` 已经够用。
+- **Require status checks to pass**：OFF（目前没有配置 status checks；开了会挡住 PR）
+- **Require signed commits**：OFF（NPC 用 App 身份提交，可能不是签名提交）
+- **Require linear history**：可选
+- **Require merge queue**：OFF
+- **Require deployments**：OFF
+- **Require code scanning / code quality / code coverage**：OFF
+- **Require an additional approval for unattributed Copilot pull requests**：OFF。我们不用 Copilot coding agent；而且 Required approvals = 0 时这条没有效果。
+- **Automatically request Copilot code review**：OFF
+
+### Bypass list
+
+- 不要加入 `npc-pm` / `npc-java`；否则 NPC 可以绕过规则直接推 `main`。
+- 如果只加入你自己（admin）用于紧急情况，可以接受，但技术强制会弱一点。
+
+### 仓库设置
+
+- **Settings → General → Pull Requests → Allow auto-merge**：**OFF**
+- 不要开启自动合并。
 
 这样 NPC 只能把提交推到 `ai-npcs/issue-<n>`，最终由人类合并 PR。
 
-> 如果仓库是 **Private + Free**，这个分支保护页面会提示需要升级 Pro；这种情况下只能改用 Public，或升级到 Pro/Team/Enterprise。
+> 如果仓库是 **Private + Free**，Rulesets / Branches 可能不可用；改用 Public，或升级到 Pro/Team/Enterprise。
 
 ## 8. 验证
 
