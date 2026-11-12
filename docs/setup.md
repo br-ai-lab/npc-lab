@@ -179,6 +179,9 @@ GitHub 现在推荐用 **Rulesets**（**Settings → Rules → Rulesets**）；�
 - **Require linear history**：可选
 - **Require merge queue**：OFF
 - **Require deployments**：OFF
+- **Require code scanning / code quality / code coverage**：OFF
+- **Require an additional approval for unattributed Copilot pull requests**：OFF。我们不用 Copilot coding agent；而且 Required approvals = 0 时这条没有效果。
+- **Automatically request Copilot code review**：OFF
 
 ### Bypass list
 
