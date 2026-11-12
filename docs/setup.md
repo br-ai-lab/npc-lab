@@ -40,8 +40,15 @@ Stage 1 需要两个 App：`npc-pm` 和 `npc-java`。**App 名称必须与角色
    - **Metadata**：Read-only（默认）
 4. 其他权限保持默认，不要给 Administration 权限。
 5. 点击 **Create GitHub App**。
-6. 在 App 页面记录 **App ID**（一串数字）。
-7. 页面底部点击 **Generate a private key**，下载 `.pem` 文件。不要把这个文件提交到仓库。
+6. 创建完成后，你会进入这个 App 的设置页。左侧选择 **General**（默认就是它），页面顶部 **About** 区域有一行 **App ID**，是一串数字（例如 `1234567`）。把这个数字记下来。
+   - 如果关掉了页面，可以这样找回：
+     - 个人账号：打开 `https://github.com/settings/apps`，点 `npc-pm` 或 `npc-java`
+     - 组织：打开 `https://github.com/organizations/br-ai-lab/settings/apps`，点对应 App
+   - App 设置页的 URL 形如 `https://github.com/settings/apps/npc-pm` 或 `https://github.com/organizations/br-ai-lab/settings/apps/npc-pm`。
+7. 在同一个 **General** 设置页，向下滚动到 **Private keys** 区域（通常在页面靠下，和 **Client secrets**、**Webhook** 在同一组）。点击 **Generate a private key**。
+   - 浏览器会立刻下载一个 `.pem` 文件，文件名类似 `npc-pm.2026-11-12.private-key.pem`，一般在你电脑的“下载/Downloads”文件夹。
+   - GitHub 不会再次显示这个私钥；如果丢了，只能点 **Generate a private key** 重新生成，然后更新对应的 GitHub Secret。
+   - 不要把这个 `.pem` 文件提交到仓库，也不要发到聊天里。
 8. 点击 **Install App**，选择 **Only select repositories** → `npc-lab` → **Install**。
 
 > 私有 key 只显示/下载一次。丢了就重新生成，并更新对应的 GitHub Secret。
@@ -57,6 +64,8 @@ Stage 1 需要两个 App：`npc-pm` 和 `npc-java`。**App 名称必须与角色
 | `NPC_JAVA_APP_ID` | `npc-java` 的 App ID |
 | `NPC_JAVA_PRIVATE_KEY` | `npc-java` 的 `.pem` 文件全文 |
 | `CLAUDE_CODE_OAUTH_TOKEN` | 下一步生成的 token |
+
+> `.pem` 是文本文件。用 VS Code 或记事本打开它，全选复制，粘贴到对应的 Secret 值里。内容必须包含 `-----BEGIN RSA PRIVATE KEY-----` 和 `-----END RSA PRIVATE KEY-----` 两行，否则 App token 会创建失败。
 
 ## 4. 生成 Claude Code token
 
