@@ -6,9 +6,19 @@
 ## 1. 创建仓库
 
 1. 打开 GitHub，进入 `br-ai-lab`（账号或组织）。
-2. 新建一个 **Public** 仓库，名称建议 `npc-lab`。
+2. 新建一个仓库，名称建议 `npc-lab`。
 3. 不要初始化 README、`.gitignore` 或 License（本地已经有文件）。
 4. 创建后先不要 push；等下面配置完再推。
+
+### Public 还是 Private？
+
+| 选项 | GitHub Actions | `main` 分支保护 | 适合 |
+|---|---|---|---|
+| **Public** | 标准 runner 免费无限 | Free 计划也可用 | 推荐：实验、Free 计划 |
+| **Private + Pro/Team/Enterprise** | 每月 2,000–50,000 分钟 | 可用 | 代码不公开、有付费计划 |
+| **Private + Free** | 每月 2,000 分钟 | **不可用**（需要 Pro 或改为 Public） | 不推荐：`main` 保护只能靠 prompt |
+
+> 需求文档要求“主分支保护必须技术强制”。如果你在 Free 计划下用 Private，这条无法满足；要么改用 Public，要么升级到 Pro/Team/Enterprise。
 
 ## 2. 创建两个 GitHub App
 
@@ -100,6 +110,8 @@ git push -u origin feat/ai-npc-team:main
 - 保存
 
 这样 NPC 只能把提交推到 `ai-npcs/issue-<n>`，最终由人类合并 PR。
+
+> 如果仓库是 **Private + Free**，这个分支保护页面会提示需要升级 Pro；这种情况下只能改用 Public，或升级到 Pro/Team/Enterprise。
 
 ## 8. 验证
 
