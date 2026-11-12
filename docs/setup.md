@@ -34,6 +34,8 @@ Stage 1 需要两个 App：`npc-pm` 和 `npc-java`。**App 名称必须与角色
    - **Homepage URL**：填你的仓库地址，例如 `https://github.com/br-ai-lab/npc-lab`
      - 两个 App 可以填同一个 URL；它只是 App 的介绍页，不影响 NPC 身份。
      - NPC 的身份由 **GitHub App name**（`npc-pm` / `npc-java`）决定，不是 Homepage URL。
+
+> **为什么两个 App 可以共用同一个 Homepage URL？** Homepage URL 只是介绍页，不参与运行。区分角色的是 App 名称/slug、App ID/private key、对应 workflow 和 role prompt。两个 App 都安装到同一个 `npc-lab` 仓库，是因为它们要在同一个 Issue 里协作，不是因为它们是同一个角色。
    - **Webhook**：取消勾选 **Active**
 3. **Repository permissions** 设置为：
    - **Contents**：Read and write
