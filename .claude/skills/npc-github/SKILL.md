@@ -41,6 +41,12 @@ gh issue comment "$ISSUE_NUMBER" --body "你的评论"
 - 不要新建逐任务分支。
 - 不要合并 PR；PR 由人类 review/merge。
 
+## 推送
+
+- 提交前先 `git pull --rebase origin ai-npcs/issue-<n>`。
+- `git push` 被拒绝时，再 `git pull --rebase` 后重试；不要 force push。
+- 并行角色只改自己目录；如果 rebase 冲突，停止并 @npc-pm。
+
 ## 权限
 
 - 写入前确认 Issue 带有 `npc-work-mode` 标签。
