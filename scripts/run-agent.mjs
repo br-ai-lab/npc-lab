@@ -1,4 +1,4 @@
-import { execSync, spawnSync } from "node:child_process";
+import { execSync, spawn } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 import { getRole } from "./team.mjs";
@@ -128,6 +128,25 @@ function run(cmd) {
   });
 }
 
+function runClaude(args, env) {
+  return new Promise((resolve) => {
+    const child = spawn("claude", args, { env, stdio: ["ignore", "pipe", "pipe"] });
+    let stdout = "";
+    let stderr = "";
+
+    child.stdout.on("data", (chunk) => {
+      stdout += chunk;
+      process.stdout.write(chunk);
+    });
+    child.stderr.on("data", (chunk) => {
+      stderr += chunk;
+      process.stderr.write(chunk);
+    });
+    child.on("error", (error) => resolve({ stdout, stderr, status: 1, error }));
+    child.on("close", (status) => resolve({ stdout, stderr, status: status ?? 1 }));
+  });
+}
+
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const issue = process.env.ISSUE_NUMBER;
   const branch = process.env.BRANCH;
@@ -153,8 +172,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     triggerComment: process.env.TRIGGER_COMMENT ?? "",
   });
 
-  const result = spawnSync(
-    "claude",
+  const result = await runClaude(
     [
       "-p",
       userPrompt,
@@ -169,13 +187,11 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
       "--output-format",
       "json",
     ],
-    { encoding: "utf8", maxBuffer: 50 * 1024 * 1024, env: buildAgentEnv(process.env) },
+    buildAgentEnv(process.env),
   );
 
   const stdout = result.stdout ?? "";
   writeFileSync("agent-output.txt", stdout, "utf8");
-  if (stdout) process.stdout.write(stdout);
-  if (result.stderr) process.stderr.write(result.stderr);
 
   if (result.error) {
     console.error(result.error);
