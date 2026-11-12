@@ -24,6 +24,19 @@ npm run build
 - 检查 375 / 768 / 1024 / 1440 宽度。
 - 如环境支持 Playwright，截图；没有就说明未截图。
 
+## 不要卡住
+
+- 不要在前台运行 `npm run dev` 或任何不会退出的命令。
+- 用 `npm run build` 验证；需要预览时用：
+
+  ```bash
+  nohup npm run dev > /tmp/vite.log 2>&1 &
+  ```
+
+  记下 PID，结束后 `kill`。
+- 每条命令加超时，例如 `timeout 300 npm install`、`timeout 300 npm run build`。
+- 超过 5 分钟没有输出就停止，检查日志，向 PM 汇报阻塞。
+
 ## 目录
 
 - 只改派工单指定的前端目录。
