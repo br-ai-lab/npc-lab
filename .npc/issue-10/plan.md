@@ -94,9 +94,9 @@ CONFIRMED         --force----> FORCED_OUT（异常行为，强制离场）
 |---|---|---|---|---|---|---|---|
 | T1 | 识别制度图片并生成 Markdown | npc-ocr | P0 | 无 | 已完成 | `docs/公司访客管理制度.md` 覆盖七章、条目完整、可读 | `docs/公司访客管理制度.md`，提交 `dc13a8e`，7/7 章、6/6 登记项 |
 | T2 | Java + SQLite 后端 API | npc-java | P0 | T1 | 已完成 | `backend/` 可 `mvn -q package`；接口与本文契约一致；有后端单测/自测记录 | 提交 `61d7b34`；`mvn test` 9/9 通过；curl 验证登记→确认→离场、409/400/404、统计 |
-| T3 | React 前端 | npc-react | P0 | T1 | 进行中 | `frontend/` 可 `npm run build`；四个页面可用；联调契约一致 | 第 2 轮派发后 workflow 卡住被取消，未产出 `frontend/`；第 4 轮重新派发 |
-| T4 | Playwright E2E + API 测试 | npc-qa | P0 | T2,T3 | 待开始 | `tests/visitor-e2e/` 真实执行并给出通过/失败数与证据 | - |
-| T5 | 系统运行与使用说明 | npc-ocr | P2 | T2,T3 | 待开始 | `docs/visitor-system.md` 含启动步骤、接口列表、操作流程、已知问题 | - |
+| T3 | React 前端 | npc-react | P0 | T1 | 已完成 | `frontend/` 可 `npm run build`；四个页面可用；联调契约一致 | 提交 `20b5ab9`；构建通过（46 modules，1.0s）；14/14 浏览器自测；契约字段核对一致 |
+| T4 | Playwright E2E + API 测试 | npc-qa | P0 | T2,T3 | 进行中 | `tests/visitor-e2e/` 真实执行并给出通过/失败数与证据 | 第 5 轮派发 |
+| T5 | 系统运行与使用说明 | npc-ocr | P2 | T2,T3 | 进行中 | `docs/visitor-system.md` 含启动步骤、接口列表、操作流程、已知问题 | 第 5 轮派发 |
 
 ## 接力计划
 
@@ -104,7 +104,8 @@ CONFIRMED         --force----> FORCED_OUT（异常行为，强制离场）
 2. 第 2 轮：T2（npc-java）与 T3（npc-react）并行，二者只改各自目录。
 3. 第 3 轮：T2 验收完成；T3（npc-react）首次运行卡住后由人类取消，未产出 `frontend/`。
 4. 第 4 轮：重新派发 T3（npc-react）。T3 验收完成后立即并行派发 T4（npc-qa）与 T5（npc-ocr）。
-5. 第 5 轮：PM 汇总，PR 保持 Open 等人类 review。
+5. 第 5 轮：T3 已验收（提交 `20b5ab9`）；并行派发 T4（npc-qa，真实前后端联调 + E2E）与 T5（npc-ocr，运行/使用说明）。
+6. 第 6 轮：PM 汇总，PR 保持 Open 等人类 review。
 
 ## 约束
 
