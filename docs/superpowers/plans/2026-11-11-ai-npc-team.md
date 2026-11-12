@@ -22,7 +22,7 @@
 - 模型认证二选一：`CLAUDE_CODE_OAUTH_TOKEN`，或 `ANTHROPIC_AUTH_TOKEN` + `ANTHROPIC_BASE_URL`（模型变量可选）。
 - 评论跟随 Issue 主体语言；代码、标识符、接口名保持英文。
 - 每个 Issue 最多 20 次接力。一条评论最多 3 个角色提及。单次完整运行预算上限 $10。
-- Agent 最后一行必须是 `NEXT:<role>` 或 `NEXT:none`。
+- Agent 最后一行必须是 `NEXT:<role>[,<role>...]`（最多 3 个）或 `NEXT:none`。
 - 被阻塞时评论 `@<human-owner>` 并输出 `NEXT:none`。
 - prompt、评论、代码、日志里都不能出现密钥。禁止破坏性命令。
 - Node 22、ESM、内置 `node:test`。脚本不引入运行时依赖。
@@ -334,8 +334,8 @@ git commit -m "feat: gate starts and writes on role, label, and mention"
 - 测试：`tests/next.test.mjs`
 
 **接口：**
-- 产出： `parseNext(output: string): { role: string | null, error?: string }`
-- 接受最后一行匹配 `NEXT:<slug>` 或 `NEXT:none`；slug 必须存在于 `TEAM`。
+- 产出： `parseNext(output: string): { roles: string[], error?: string }`
+- 接受最后一行匹配 `NEXT:<slug>[,<slug>...]`（最多 3 个）或 `NEXT:none`；slug 必须存在于 `TEAM`。
 
 - [ ] **步骤 1: Write the failing tests**
 
@@ -372,7 +372,7 @@ test("reports a missing NEXT line", () => {
 
 - [ ] **步骤 3: Implement `parseNext`**
 
-按行拆分输出，取最后一行以 `NEXT:` 开头的行。去掉空白后与 `none` 或 `roleSlugs()` 比较。返回 `{ role }`、`{ role: null }` 或 `{ role: null, error }`。
+按行拆分输出，取最后一行以 `NEXT:` 开头的行。去掉空白后：`none` 返回空数组；否则按逗号拆分、去重、校验每个 slug（最多 3 个）。返回 `{ roles }` 或 `{ roles: [], error }`。实际测试以 `tests/next.test.mjs` 为准（已覆盖多角色）。
 
 - [ ] **步骤 4: Run the tests to verify they pass**
 
@@ -462,7 +462,7 @@ for (const role of TEAM) {
 4. 把工作拆成任务，写清负责人、优先级、依赖、验收标准、状态。
 5. Post a work order to the next role using the work-order template; include `@<role>` in a standalone paragraph and "完成后 @npc-pm 汇报".
 6. 绝不写业务代码；只更新 `.npc/issue-<n>/plan.md` 和 `status.md`。
-7. 结束时用 `NEXT:<role>` 指定下一个角色，完成/阻塞时用 `NEXT:none`。
+7. 结束时用 `NEXT:<role>` 指定下一个角色；并行派发多个角色时用 `NEXT:<role1>,<role2>`（最多 3 个）；完成/阻塞时用 `NEXT:none`。`NEXT:` 才是触发方式，只在评论里 @ 不会启动下一个 workflow。
 8. 被阻塞时评论 `@<human-owner>` 并输出 `NEXT:none`。
 9. 最多 20 次接力；达到上限就总结并 `NEXT:none`。
 
@@ -597,11 +597,11 @@ test("parses the JSON result and cost", () => {
 - [ ] **步骤 6：实现 `run-agent.mjs`**
 
 - 读取 `ROLE_PROMPT` 文件。
-- `buildUserPrompt` 包含 Issue 编号、分支、触发评论，以及这条指令：用 `gh issue view` 读 Issue，按角色 prompt 执行，用 `gh issue comment` 发评论，最后以 `NEXT:<role>` 或 `NEXT:none` 结束。
+- `buildUserPrompt` 包含 Issue 编号、分支、触发评论，以及这条指令：用 `gh issue view` 读 Issue，按角色 prompt 执行，用 `gh issue comment` 发评论，最后以 `NEXT:<role>[,<role>...]` 或 `NEXT:none` 结束。
 - 读取 `.npc/issue-<n>/handoff.json`（默认 `{ "count": 0 }`）。如果 `count >= 20`，用 `gh issue comment` 评论 `@<owner> 已达到接力上限` 并退出 0。成功运行后写入 `{ "count": count + 1 }`。
 - 启动 `claude -p <userPrompt> --append-system-prompt <rolePrompt> --allowedTools <allowedTools> --permission-mode acceptEdits --max-turns 60 --output-format json`，把 stdout 写入 `agent-output.txt` 并同时输出到控制台。
 - `parseAgentOutput(stdout)` 返回 `{ text, costUsd }`；记录 `costUsd`。如果 `costUsd > 10`，评论 `@<owner> 已达到成本上限`，在 dispatch 前退出 0。
-- 调用 `parseNext(text)`。
+- 调用 `parseNext(text)`；对返回的每个 role 逐一 `dispatchNext`。
 - 如果 `role` 非空，调用 `dispatchNext({ role, issue, branch, run: execSync })`，使用：
   `gh api repos/$GITHUB_REPOSITORY/dispatches -f event_type=<role.eventType> -f client_payload[issue]=<issue> -f client_payload[branch]=<branch>`.
 - 如果缺失/非法，记录日志并退出 0（链条停止，人类可以介入）。

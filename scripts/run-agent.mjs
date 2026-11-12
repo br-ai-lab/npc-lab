@@ -178,11 +178,13 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     console.error(`NEXT parse error: ${next.error}`);
     process.exit(0);
   }
-  if (!next.role) {
+  if (next.roles.length === 0) {
     console.log("NEXT:none — chain stops");
     process.exit(0);
   }
 
-  await dispatchNext({ role: next.role, issue, branch, run });
-  console.log(`dispatched ${next.role}`);
+  for (const role of next.roles) {
+    await dispatchNext({ role, issue, branch, run });
+    console.log(`dispatched ${role}`);
+  }
 }
