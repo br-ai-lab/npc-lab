@@ -32,6 +32,27 @@ export function parseAgentOutput(stdout) {
   }
 }
 
+export async function resolveNext({ text, issue, roleSlug, run }) {
+  const stdoutNext = parseNext(text);
+  if (stdoutNext.roles.length > 0) return stdoutNext;
+
+  try {
+    const raw = await run(`gh api repos/$GITHUB_REPOSITORY/issues/${issue}/comments?per_page=100`);
+    const comments = JSON.parse(String(raw ?? "[]"));
+    const login = `${roleSlug}[bot]`;
+    const mine = comments.filter((comment) => comment?.user?.login === login);
+    const body = mine.at(-1)?.body;
+    if (body) {
+      const commentNext = parseNext(body);
+      if (!commentNext.error) return commentNext;
+    }
+  } catch (error) {
+    console.error(`comment NEXT lookup failed: ${error.message}`);
+  }
+
+  return stdoutNext;
+}
+
 const AUTH_ENV_KEYS = [
   "ANTHROPIC_AUTH_TOKEN",
   "ANTHROPIC_BASE_URL",
@@ -187,7 +208,12 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     process.exit(0);
   }
 
-  const next = parseNext(text);
+  const next = await resolveNext({
+    text,
+    issue,
+    roleSlug: process.env.ROLE_SLUG || "npc-pm",
+    run,
+  });
   if (next.error) {
     console.error(`NEXT parse error: ${next.error}`);
     process.exit(0);
