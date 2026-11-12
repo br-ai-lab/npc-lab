@@ -43,6 +43,7 @@ gh issue comment "$ISSUE_NUMBER" --body "你的评论"
 
 ## 推送
 
+- 提交前先 `git status --short`，确认没有遗漏的改动；只 `git add` 自己范围内的文件。
 - 提交前先 `git pull --rebase origin ai-npcs/issue-<n>`。
 - `git push` 被拒绝时，再 `git pull --rebase` 后重试；不要 force push。
 - 并行角色只改自己目录；如果 rebase 冲突，停止并 @npc-pm。

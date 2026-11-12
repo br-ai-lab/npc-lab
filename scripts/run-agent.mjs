@@ -131,7 +131,7 @@ function writeHandoff(issue, count) {
 
 export function handoffCommands({ issue, branch, count }) {
   return [
-    `git pull --rebase origin ${branch}`,
+    `git pull --rebase --autostash origin ${branch}`,
     `git add .npc/issue-${issue}/handoff.json`,
     `git commit -m "chore: handoff ${count} for issue ${issue}"`,
     "git push",
