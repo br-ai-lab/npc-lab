@@ -54,6 +54,9 @@ export function verifyConfig(root = process.cwd()) {
     if (!workflow.includes("anthropic-auth-token")) {
       problems.push(`${relativePath}: missing anthropic-auth-token input`);
     }
+    if (/\$\{\{[^\n]*#/.test(workflow)) {
+      problems.push(`${relativePath}: '#' inside a \${{ }} expression can start a YAML comment`);
+    }
     for (const command of FORBIDDEN_MERGE_COMMANDS) {
       if (workflow.includes(command)) {
         problems.push(`${relativePath}: forbidden merge command ${command}`);
