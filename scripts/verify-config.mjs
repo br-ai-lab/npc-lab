@@ -57,6 +57,9 @@ export function verifyConfig(root = process.cwd()) {
     if (/\$\{\{[^\n]*#/.test(workflow)) {
       problems.push(`${relativePath}: '#' inside a \${{ }} expression can start a YAML comment`);
     }
+    if (!workflow.includes(`group: ${slug}-issue-`)) {
+      problems.push(`${relativePath}: missing role-specific concurrency group`);
+    }
     for (const command of FORBIDDEN_MERGE_COMMANDS) {
       if (workflow.includes(command)) {
         problems.push(`${relativePath}: forbidden merge command ${command}`);
