@@ -1,0 +1,50 @@
+name: NPC React
+on:
+  issue_comment:
+    types: [created]
+  repository_dispatch:
+    types: [npc-react]
+
+permissions:
+  contents: read
+  issues: read
+  pull-requests: read
+
+concurrency:
+  group: npc-issue-${{ github.event.issue.number || github.event.client_payload.issue }}
+  cancel-in-progress: false
+
+jobs:
+  react:
+    if: |
+      (github.event_name == 'issue_comment' && github.event.comment.user.type == 'User' && contains(github.event.comment.body, '@npc-react')) ||
+      (github.event_name == 'repository_dispatch' && github.event.action == 'npc-react')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.client_payload.branch || format('ai-npcs/issue-{0}', github.event.issue.number) }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - uses: ./.github/actions/npc-agent
+        with:
+          app-id: ${{ secrets.NPC_REACT_APP_ID }}
+          private-key: ${{ secrets.NPC_REACT_PRIVATE_KEY }}
+          role-slug: npc-react
+          role-prompt: .github/npc/roles/react.md
+          allowed-tools: "Bash(git:*),Bash(gh:*),Bash(npm:*),Bash(npx:*),Bash(ls:*),Read,Write,Edit,Glob,Grep"
+          issue-number: ${{ github.event.issue.number || github.event.client_payload.issue }}
+          trigger-comment: ${{ github.event.comment.body || format('NPC report for issue {0}', github.event.client_payload.issue) }}
+          branch: ${{ github.event.client_payload.branch || format('ai-npcs/issue-{0}', github.event.issue.number) }}
+          ensure-branch-pr: "false"
+          gate: "true"
+          gate-mode: ${{ github.event_name == 'repository_dispatch' && 'write' || 'start' }}
+          claude-token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          anthropic-auth-token: ${{ secrets.ANTHROPIC_AUTH_TOKEN }}
+          anthropic-base-url: ${{ secrets.ANTHROPIC_BASE_URL }}
+          anthropic-model: ${{ secrets.ANTHROPIC_MODEL }}
+          anthropic-default-opus-model: ${{ secrets.ANTHROPIC_DEFAULT_OPUS_MODEL }}
+          anthropic-default-sonnet-model: ${{ secrets.ANTHROPIC_DEFAULT_SONNET_MODEL }}
+          anthropic-default-haiku-model: ${{ secrets.ANTHROPIC_DEFAULT_HAIKU_MODEL }}
