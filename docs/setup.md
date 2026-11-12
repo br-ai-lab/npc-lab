@@ -5,7 +5,7 @@
 
 ## 1. 创建仓库
 
-1. 打开 GitHub，进入你的账号 `winterSleep`。
+1. 打开 GitHub，进入 `br-ai-lab`（账号或组织）。
 2. 新建一个 **Public** 仓库，名称建议 `npc-lab`。
 3. 不要初始化 README、`.gitignore` 或 License（本地已经有文件）。
 4. 创建后先不要 push；等下面配置完再推。
@@ -16,10 +16,12 @@ Stage 1 需要两个 App：`npc-pm` 和 `npc-java`。**App 名称必须与角色
 
 对每个 App 重复以下步骤：
 
+> 如果 `br-ai-lab` 是组织，从组织页面的 **Settings → Developer settings → GitHub Apps** 进入；如果是个人账号，从个人 **Settings → Developer settings → GitHub Apps** 进入。
+
 1. 打开 **Settings → Developer settings → GitHub Apps → New GitHub App**。
 2. 填写：
    - **GitHub App name**：`npc-pm` 或 `npc-java`
-   - **Homepage URL**：填你的仓库地址，例如 `https://github.com/winterSleep/npc-lab`
+   - **Homepage URL**：填你的仓库地址，例如 `https://github.com/br-ai-lab/npc-lab`
    - **Webhook**：取消勾选 **Active**
 3. **Repository permissions** 设置为：
    - **Contents**：Read and write
@@ -73,7 +75,7 @@ claude setup-token
 在本地 `npc-lab` 目录：
 
 ```bash
-git remote add origin https://github.com/winterSleep/npc-lab.git
+git remote add origin https://github.com/br-ai-lab/npc-lab.git
 git push -u origin feat/ai-npc-team:main
 ```
 

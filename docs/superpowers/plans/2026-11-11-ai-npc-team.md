@@ -815,7 +815,7 @@ CLI：打印每个问题，若有问题 `process.exit(1)`。
 - [ ] **步骤 4: Write `docs/setup.md`**
 
 包含以下精确步骤：
-1. 在 `winterSleep` 下创建一个公开仓库 `npc-lab`。
+1. 在 `br-ai-lab` 下创建一个公开仓库 `npc-lab`。
 2. 创建 Stage 1 的 GitHub App：`npc-pm` 和 `npc-java`。每个都设置名称、主页，关闭 webhook；权限 Contents rw、Issues rw、Pull requests rw、Metadata r；安装到 `npc-lab`；生成私钥；记录 App ID。
 3. 添加仓库 secret：`NPC_PM_APP_ID`、`NPC_PM_PRIVATE_KEY`、`NPC_JAVA_APP_ID`、`NPC_JAVA_PRIVATE_KEY`、`CLAUDE_CODE_OAUTH_TOKEN`。
 4. 在本地运行 `claude setup-token`，把 token 粘贴到 `CLAUDE_CODE_OAUTH_TOKEN`。
