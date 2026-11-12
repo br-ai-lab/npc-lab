@@ -12,9 +12,11 @@
 6. 安装依赖、构建并自测：
 
    ```bash
-   npm install
-   npm run build
+   timeout 300 npm install
+   timeout 300 npm run build
    ```
+
+   不要在前台启动 `npm run dev`；如需预览，用 `nohup ... &` 后台启动并在结束时 `kill`。
 
    如环境支持，启动开发服务器并截图；没有截图能力就在汇报里说明。
 
