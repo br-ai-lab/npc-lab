@@ -95,7 +95,7 @@ CONFIRMED         --force----> FORCED_OUT（异常行为，强制离场）
 | T1 | 识别制度图片并生成 Markdown | npc-ocr | P0 | 无 | 已完成 | `docs/公司访客管理制度.md` 覆盖七章、条目完整、可读 | `docs/公司访客管理制度.md`，提交 `dc13a8e`，7/7 章、6/6 登记项 |
 | T2 | Java + SQLite 后端 API | npc-java | P0 | T1 | 已完成 | `backend/` 可 `mvn -q package`；接口与本文契约一致；有后端单测/自测记录 | 提交 `61d7b34`；`mvn test` 9/9 通过；curl 验证登记→确认→离场、409/400/404、统计 |
 | T3 | React 前端 | npc-react | P0 | T1 | 已完成 | `frontend/` 可 `npm run build`；四个页面可用；联调契约一致 | 提交 `20b5ab9`；构建通过（46 modules，1.0s）；14/14 浏览器自测；契约字段核对一致 |
-| T4 | Playwright E2E + API 测试 | npc-qa | P0 | T2,T3 | 待开始（重新派发） | `tests/visitor-e2e/` 真实执行并给出通过/失败数与证据 | 第 5 轮 run `43203853087` 在 agent 启动前失败（App token 404），无产出；第 6 轮重新派发 |
+| T4 | Playwright E2E + API 测试 | npc-qa | P0 | T2,T3 | 待开始（第 7 轮再次派发） | `tests/visitor-e2e/` 真实执行并给出通过/失败数与证据 | run `43203853087`、`43204355539` 均在建 GitHub App token 时 404（`get-a-repository-installation-for-the-authenticated-app`），agent 未产出；第 7 轮再次派发 |
 | T5 | 系统运行与使用说明 | npc-ocr | P2 | T2,T3 | 已完成 | `docs/visitor-system.md` 含启动步骤、接口列表、操作流程、已知问题 | 提交 `cec05e2`；PM 核对端口/环境变量/接口/错误码与代码一致 |
 
 ## 接力计划
@@ -106,7 +106,8 @@ CONFIRMED         --force----> FORCED_OUT（异常行为，强制离场）
 4. 第 4 轮：重新派发 T3（npc-react）。T3 验收完成后立即并行派发 T4（npc-qa）与 T5（npc-ocr）。
 5. 第 5 轮：T3 已验收（提交 `20b5ab9`）；并行派发 T4（npc-qa，真实前后端联调 + E2E）与 T5（npc-ocr，运行/使用说明）。
 6. 第 6 轮：T5 已验收（提交 `cec05e2`）；T4 的 QA workflow（run `43203853087`）在创建 GitHub App token 时 404 失败，agent 未启动、无任何产出，故重新派发 T4（npc-qa）。
-7. 第 7 轮：T4 汇报后 PM 汇总，PR（#11，draft）保持 Open 等人类 review。
+7. 第 7 轮：第 6 轮派发的 QA workflow（run `43204355539`，10:53 UTC）再次在同一处失败：agent 步骤内 `actions/create-github-app-token` 返回 404 `get-a-repository-installation-for-the-authenticated-app`，Playwright 安装虽成功但 agent 在 8 秒内退出，`tests/visitor-e2e/` 仍未产出。同期 OCR workflow 成功，说明模型/CLAUDE token 正常，问题定位在 QA App 的安装或 `NPC_QA_APP_ID`/`NPC_QA_PRIVATE_KEY` 配置。应人类要求再次派发 T4；若第三次仍同点失败，将 @ 人类核查 QA App 安装与仓库 Secret。
+8. 第 8 轮：T4 汇报后 PM 汇总，PR（#11，draft）保持 Open 等人类 review。
 
 ## 约束
 
