@@ -1,5 +1,8 @@
 # 设置说明（Stage 1）
 
+> 如果要在 **bmw.ghe.com** 上用 **GitHub Copilot CLI** 部署，请看新手册：`docs/setup-copilot-cli.md`。
+> 本文保留为 Claude Code / github.com 的原始说明，同时作为回滚参考。
+
 这份文档带你从零配置 Stage 1：项目经理（`npc-pm`）+ Java 开发（`npc-java`）。
 所有步骤都可以在 GitHub 网页完成；只有生成 Claude Code token 需要在本地终端跑一次命令。
 

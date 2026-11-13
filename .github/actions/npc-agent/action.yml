@@ -34,6 +34,30 @@ inputs:
     description: CLAUDE_CODE_OAUTH_TOKEN (optional if using ANTHROPIC_AUTH_TOKEN)
     required: false
     default: ""
+  runtime:
+    description: "Agent runtime: claude or copilot"
+    required: false
+    default: "claude"
+  copilot-token:
+    description: COPILOT_GITHUB_TOKEN for GitHub Copilot CLI
+    required: false
+    default: ""
+  copilot-model:
+    description: Copilot model name (default claude-sonnet-4.5)
+    required: false
+    default: ""
+  github-host:
+    description: GitHub hostname for GHE.com, for example bmw.ghe.com
+    required: false
+    default: ""
+  copilot-budget-premium-requests:
+    description: Premium request budget for one run
+    required: false
+    default: ""
+  copilot-output-format:
+    description: Copilot CLI output format (text or json)
+    required: false
+    default: ""
   anthropic-auth-token:
     description: ANTHROPIC_AUTH_TOKEN
     required: false
@@ -87,13 +111,20 @@ runs:
         node-version: "22"
 
     - name: Install Claude Code
+      if: inputs.runtime != 'copilot'
       shell: bash
       run: npm install -g @anthropic-ai/claude-code
+
+    - name: Install Copilot CLI
+      if: inputs.runtime == 'copilot'
+      shell: bash
+      run: npm install -g @github/copilot
 
     - name: Configure git and gh
       shell: bash
       env:
         GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        GH_HOST: ${{ inputs.github-host }}
         APP_ID: ${{ inputs.app-id }}
         ROLE_SLUG: ${{ inputs.role-slug }}
       run: |
@@ -106,6 +137,7 @@ runs:
       shell: bash
       env:
         GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        GH_HOST: ${{ inputs.github-host }}
         ISSUE_NUMBER: ${{ inputs.issue-number }}
         COMMENT_BODY: ${{ github.event.comment.body || '' }}
         AUTHOR_ASSOCIATION: ${{ github.event.comment.author_association || '' }}
@@ -135,6 +167,7 @@ runs:
       shell: bash
       env:
         GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        GH_HOST: ${{ inputs.github-host }}
         ISSUE_NUMBER: ${{ inputs.issue-number }}
         BRANCH: ${{ inputs.branch }}
         BASE_BRANCH: main
@@ -149,11 +182,17 @@ runs:
       shell: bash
       env:
         GH_TOKEN: ${{ steps.app-token.outputs.token }}
+        GH_HOST: ${{ inputs.github-host }}
         GIT_EDITOR: "true"
         GIT_TERMINAL_PROMPT: "0"
         CI: "true"
         NO_COLOR: "1"
         npm_config_yes: "true"
+        NPC_RUNTIME: ${{ inputs.runtime }}
+        COPILOT_GITHUB_TOKEN: ${{ inputs.copilot-token }}
+        COPILOT_MODEL: ${{ inputs.copilot-model || 'claude-sonnet-4.5' }}
+        COPILOT_OUTPUT_FORMAT: ${{ inputs.copilot-output-format }}
+        COPILOT_BUDGET_PREMIUM_REQUESTS: ${{ inputs.copilot-budget-premium-requests || '250' }}
         CLAUDE_CODE_OAUTH_TOKEN: ${{ inputs.claude-token }}
         ANTHROPIC_AUTH_TOKEN: ${{ inputs.anthropic-auth-token }}
         ANTHROPIC_BASE_URL: ${{ inputs.anthropic-base-url }}

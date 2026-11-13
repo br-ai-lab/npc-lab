@@ -48,6 +48,16 @@ test("requires one auth credential", () => {
   assert.throws(() => buildAgentEnv({}), /auth/i);
 });
 
+test("copilot runtime requires COPILOT_GITHUB_TOKEN", () => {
+  assert.throws(() => buildAgentEnv({}, "copilot"), /COPILOT_GITHUB_TOKEN/);
+  const env = buildAgentEnv(
+    { COPILOT_GITHUB_TOKEN: "token", GH_HOST: "bmw.ghe.com" },
+    "copilot",
+  );
+  assert.equal(env.COPILOT_GITHUB_TOKEN, "token");
+  assert.equal(env.GH_HOST, "bmw.ghe.com");
+});
+
 test("handoff commands pull before push", () => {
   const commands = handoffCommands({ issue: 5, branch: "ai-npcs/issue-5", count: 2 });
   assert.match(commands[0], /git pull --rebase --autostash/);

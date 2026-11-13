@@ -4,6 +4,15 @@ import { pathToFileURL } from "node:url";
 import { getRole } from "./team.mjs";
 import { parseNext } from "./next.mjs";
 import { summarizeEvents } from "./timing.mjs";
+import {
+  DEFAULT_COPILOT_MODEL,
+  buildCopilotArgs,
+  buildCopilotEnv,
+  parseCopilotOutput,
+  prepareCopilotAgent,
+  premiumRequestBudget,
+  summarizeCopilotRun,
+} from "./copilot.mjs";
 
 const HANDOFF_LIMIT = 20;
 const COST_LIMIT_USD = 10;
@@ -89,7 +98,9 @@ const AUTH_ENV_KEYS = [
   "CLAUDE_CODE_OAUTH_TOKEN",
 ];
 
-export function buildAgentEnv(baseEnv = process.env) {
+export function buildAgentEnv(baseEnv = process.env, runtime = "claude") {
+  if (runtime === "copilot") return buildCopilotEnv(baseEnv);
+
   const env = { ...baseEnv };
   for (const key of AUTH_ENV_KEYS) {
     if (!env[key] || String(env[key]).trim() === "") delete env[key];
@@ -161,8 +172,16 @@ function ghIssueComment(issue, body) {
 }
 
 function runClaude(args, env, timeoutMs) {
+  return runProcess("claude", args, env, timeoutMs);
+}
+
+function runCopilot(args, env, timeoutMs) {
+  return runProcess("copilot", args, env, timeoutMs);
+}
+
+function runProcess(command, args, env, timeoutMs) {
   return new Promise((resolve) => {
-    const child = spawn("claude", args, {
+    const child = spawn(command, args, {
       env,
       stdio: ["ignore", "pipe", "pipe"],
       detached: true,
@@ -255,38 +274,97 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     triggerComment: process.env.TRIGGER_COMMENT ?? "",
   });
 
-  const result = await runClaude(
-    [
-      "-p",
-      userPrompt,
-      "--append-system-prompt",
-      rolePrompt,
-      "--allowedTools",
-      allowedTools,
-      "--permission-mode",
-      "acceptEdits",
-      "--max-turns",
-      String(budget.maxTurns),
-      "--output-format",
-      "stream-json",
-      "--verbose",
-    ],
-    buildAgentEnv(process.env),
-    budget.maxWallClockMinutes * 60 * 1000,
-  );
+  const runtime = process.env.NPC_RUNTIME || "claude";
+  const startedAt = Date.now();
+  let result;
+  let text;
+  let costUsd = 0;
+  let premiumRequests = null;
+  let model = null;
+  let timing;
+
+  if (runtime === "copilot") {
+    const copilotModel = process.env.COPILOT_MODEL || DEFAULT_COPILOT_MODEL;
+    model = copilotModel;
+
+    prepareCopilotAgent({
+      role: getRole(roleSlug) ?? { slug: roleSlug, name: roleSlug },
+      promptPath: rolePromptPath,
+      model: copilotModel,
+    });
+
+    result = await runCopilot(
+      buildCopilotArgs({
+        prompt: userPrompt,
+        agentName: roleSlug,
+        model: copilotModel,
+        allowedTools,
+        outputFormat: process.env.COPILOT_OUTPUT_FORMAT || "text",
+      }),
+      buildAgentEnv(process.env, "copilot"),
+      budget.maxWallClockMinutes * 60 * 1000,
+    );
+
+    const parsed = parseCopilotOutput(result.stdout);
+    if (parsed.premiumRequests == null && result.stderr) {
+      const stderrUsage = parseCopilotOutput(result.stderr);
+      if (stderrUsage.premiumRequests != null) parsed.premiumRequests = stderrUsage.premiumRequests;
+    }
+    text = parsed.text;
+    premiumRequests = parsed.premiumRequests;
+    model = parsed.model || copilotModel;
+
+    timing = summarizeCopilotRun({
+      wallClockMs: Date.now() - startedAt,
+      premiumRequests,
+      model,
+      budgetPremiumRequests: premiumRequestBudget(process.env),
+    });
+  } else {
+    result = await runClaude(
+      [
+        "-p",
+        userPrompt,
+        "--append-system-prompt",
+        rolePrompt,
+        "--allowedTools",
+        allowedTools,
+        "--permission-mode",
+        "acceptEdits",
+        "--max-turns",
+        String(budget.maxTurns),
+        "--output-format",
+        "stream-json",
+        "--verbose",
+      ],
+      buildAgentEnv(process.env),
+      budget.maxWallClockMinutes * 60 * 1000,
+    );
+
+    const parsed = parseAgentOutput(result.stdout);
+    text = parsed.text;
+    costUsd = parsed.costUsd;
+    timing = summarizeEvents(result.events ?? []);
+  }
 
   const stdout = result.stdout ?? "";
   writeFileSync("agent-output.txt", stdout, "utf8");
-
-  const timing = summarizeEvents(result.events ?? []);
   writeFileSync("npc-timing.json", `${JSON.stringify(timing, null, 2)}\n`, "utf8");
-  console.log(
-    `npc timing: wall=${(timing.wallClockMs / 1000).toFixed(1)}s ` +
-      `model=${(timing.modelApiMs / 1000).toFixed(1)}s ` +
-      `tools=${timing.toolCalls} top=${timing.topTools
-        .map((tool) => `${tool.name}:${(tool.totalMs / 1000).toFixed(1)}s`)
-        .join(",")}`,
-  );
+
+  if (runtime === "copilot") {
+    console.log(
+      `npc timing: runtime=copilot wall=${(timing.wallClockMs / 1000).toFixed(1)}s ` +
+        `premiumRequests=${timing.premiumRequests ?? "unknown"} model=${timing.model ?? "unknown"}`,
+    );
+  } else {
+    console.log(
+      `npc timing: wall=${(timing.wallClockMs / 1000).toFixed(1)}s ` +
+        `model=${(timing.modelApiMs / 1000).toFixed(1)}s ` +
+        `tools=${timing.toolCalls} top=${timing.topTools
+          .map((tool) => `${tool.name}:${(tool.totalMs / 1000).toFixed(1)}s`)
+          .join(",")}`,
+    );
+  }
 
   if (result.timedOut) {
     const message =
@@ -309,12 +387,19 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     process.exit(1);
   }
   if (result.status !== 0) {
-    console.error(`claude exited with status ${result.status}`);
+    console.error(`${runtime === "copilot" ? "copilot" : "claude"} exited with status ${result.status}`);
     process.exit(1);
   }
 
-  const { text, costUsd } = parseAgentOutput(stdout);
-  console.log(`agent cost: $${costUsd.toFixed(4)}`);
+  if (runtime === "copilot") {
+    if (premiumRequests == null) {
+      console.warn("copilot usage not found in output; premium request budget cannot be enforced");
+    } else {
+      console.log(`agent premium requests: ${premiumRequests}`);
+    }
+  } else {
+    console.log(`agent cost: $${costUsd.toFixed(4)}`);
+  }
 
   writeHandoff(issue, handoff.count + 1);
   try {
@@ -330,7 +415,15 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     }
   }
 
-  if (costUsd > COST_LIMIT_USD) {
+  const copilotBudget = premiumRequestBudget(process.env);
+  if (runtime === "copilot") {
+    if (premiumRequests != null && premiumRequests > copilotBudget) {
+      run(
+        `gh issue comment ${issue} --body "@${owner} 已达到 Copilot 预算上限（${premiumRequests} premium requests，上限 ${copilotBudget}），请人工确认。"`,
+      );
+      process.exit(0);
+    }
+  } else if (costUsd > COST_LIMIT_USD) {
     run(`gh issue comment ${issue} --body "@${owner} 已达到成本上限（$${costUsd.toFixed(2)}），请人工确认。"`);
     process.exit(0);
   }

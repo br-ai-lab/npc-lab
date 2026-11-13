@@ -68,11 +68,14 @@ export function verifyConfig(root = process.cwd()) {
     if (!workflow.includes("npc-timing.json")) {
       problems.push(`${relativePath}: missing timing artifact upload`);
     }
-    if (!workflow.includes("claude-token")) {
-      problems.push(`${relativePath}: missing claude-token input`);
+    if (!workflow.includes("copilot-token")) {
+      problems.push(`${relativePath}: missing copilot-token input`);
     }
-    if (!workflow.includes("anthropic-auth-token")) {
-      problems.push(`${relativePath}: missing anthropic-auth-token input`);
+    if (!workflow.includes("vars.NPC_GITHUB_HOST")) {
+      problems.push(`${relativePath}: missing vars.NPC_GITHUB_HOST`);
+    }
+    if (!workflow.includes("runtime:")) {
+      problems.push(`${relativePath}: missing runtime input`);
     }
     if (/\$\{\{[^\n]*#/.test(workflow)) {
       problems.push(`${relativePath}: '#' inside a \${{ }} expression can start a YAML comment`);
@@ -102,8 +105,16 @@ export function verifyConfig(root = process.cwd()) {
   const action = read(root, ".github/actions/npc-agent/action.yml");
   if (action === null) {
     problems.push("missing composite action");
-  } else if (!action.includes("actions/create-github-app-token")) {
-    problems.push("composite action missing create-github-app-token");
+  } else {
+    if (!action.includes("actions/create-github-app-token")) {
+      problems.push("composite action missing create-github-app-token");
+    }
+    if (!action.includes("@github/copilot")) {
+      problems.push("composite action missing Copilot CLI install");
+    }
+    if (!action.includes("@anthropic-ai/claude-code")) {
+      problems.push("composite action missing Claude Code install");
+    }
   }
 
   for (const template of TEMPLATES) {
