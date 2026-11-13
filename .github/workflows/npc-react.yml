@@ -25,6 +25,16 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            ~/.m2
+            ~/.cache/ms-playwright
+          key: ${{ runner.os }}-npc-${{ hashFiles('**/package-lock.json', '**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-npc-
       - uses: ./.github/actions/npc-agent
         with:
           app-id: ${{ secrets.NPC_REACT_APP_ID }}
@@ -38,6 +48,7 @@ jobs:
           ensure-branch-pr: "false"
           gate: "true"
           gate-mode: "write"
+          prepare-env: "true"
           claude-token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           anthropic-auth-token: ${{ secrets.ANTHROPIC_AUTH_TOKEN }}
           anthropic-base-url: ${{ secrets.ANTHROPIC_BASE_URL }}

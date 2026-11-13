@@ -15,6 +15,8 @@ test("each role has the required fields", () => {
     assert.ok(role.promptPath.endsWith(".md"));
     assert.ok(role.skillPath.endsWith("SKILL.md"));
     assert.ok(role.scope);
+    assert.ok(Number.isInteger(role.maxTurns) && role.maxTurns > 0);
+    assert.ok(Number.isInteger(role.maxWallClockMinutes) && role.maxWallClockMinutes > 0);
   }
 });
 
