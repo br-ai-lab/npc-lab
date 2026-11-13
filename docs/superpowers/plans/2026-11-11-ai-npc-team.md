@@ -1,5 +1,7 @@
 # AI NPC 团队（A 版本）实施计划
 
+> 2026-11-13 变更：新增 GitHub Copilot CLI runtime（`NPC_RUNTIME=copilot`），用于 bmw.ghe.com 试点；Claude Code 路径保留为默认/回滚。差异与设计见 `docs/superpowers/specs/2026-11-13-copilot-cli-design.md`，部署见 `docs/setup-copilot-cli.md`。
+
 > **给执行者：** 必须使用 superpowers:subagent-driven-development（推荐）或 superpowers:executing-plans，按任务逐步执行本计划。用复选框（`- [ ]`）跟踪进度。
 
 **目标：** Build a GitHub-hosted AI team of five independently-identified roles that collaborate in an Issue, create one Issue branch and draft PR, and leave the final merge to a human. Validate the loop with PM + Java, then deliver the guest-management + OCR scenario.

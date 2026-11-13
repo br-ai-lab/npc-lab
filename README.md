@@ -14,7 +14,9 @@
 
 - [需求文档](docs/requirements.md)
 - [实施计划](docs/superpowers/plans/2026-11-11-ai-npc-team.md)
-- [设置说明](docs/setup.md)（任务 10 创建）
+- [设置说明](docs/setup.md)（Claude Code / github.com，兼回滚参考）
+- [Copilot CLI 设计方案](docs/superpowers/specs/2026-11-13-copilot-cli-design.md)
+- [Copilot CLI 部署手册（bmw.ghe.com）](docs/setup-copilot-cli.md)
 
 ## 本地测试
 

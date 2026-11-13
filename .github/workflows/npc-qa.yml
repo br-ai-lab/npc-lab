@@ -63,6 +63,12 @@ jobs:
           ensure-branch-pr: "false"
           gate: "true"
           gate-mode: "write"
+          runtime: ${{ vars.NPC_RUNTIME || 'claude' }}
+          copilot-token: ${{ secrets.COPILOT_GITHUB_TOKEN }}
+          copilot-model: ${{ vars.COPILOT_MODEL }}
+          copilot-output-format: ${{ vars.COPILOT_OUTPUT_FORMAT }}
+          github-host: ${{ vars.NPC_GITHUB_HOST }}
+          copilot-budget-premium-requests: ${{ vars.COPILOT_BUDGET_PREMIUM_REQUESTS }}
           claude-token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           anthropic-auth-token: ${{ secrets.ANTHROPIC_AUTH_TOKEN }}
           anthropic-base-url: ${{ secrets.ANTHROPIC_BASE_URL }}
