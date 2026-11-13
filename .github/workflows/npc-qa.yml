@@ -16,7 +16,7 @@ jobs:
   qa:
     if: github.event_name == 'repository_dispatch' && github.event.action == 'npc-qa'
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
     steps:
       - uses: actions/checkout@v4
         with:
@@ -42,6 +42,14 @@ jobs:
       - name: Install Playwright
         shell: bash
         run: npx playwright install --with-deps
+      - name: Prepare project dependencies
+        shell: bash
+        run: node scripts/prepare-env.mjs
+      - name: Start services
+        shell: bash
+        env:
+          ISSUE_NUMBER: ${{ github.event.client_payload.issue }}
+        run: node scripts/services.mjs start
       - uses: ./.github/actions/npc-agent
         with:
           app-id: ${{ secrets.NPC_QA_APP_ID }}
@@ -55,7 +63,6 @@ jobs:
           ensure-branch-pr: "false"
           gate: "true"
           gate-mode: "write"
-          prepare-env: "true"
           claude-token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           anthropic-auth-token: ${{ secrets.ANTHROPIC_AUTH_TOKEN }}
           anthropic-base-url: ${{ secrets.ANTHROPIC_BASE_URL }}
@@ -63,3 +70,14 @@ jobs:
           anthropic-default-opus-model: ${{ secrets.ANTHROPIC_DEFAULT_OPUS_MODEL }}
           anthropic-default-sonnet-model: ${{ secrets.ANTHROPIC_DEFAULT_SONNET_MODEL }}
           anthropic-default-haiku-model: ${{ secrets.ANTHROPIC_DEFAULT_HAIKU_MODEL }}
+      - name: Stop services
+        if: always()
+        shell: bash
+        run: node scripts/services.mjs stop
+      - name: Upload NPC timing
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: npc-timing-${{ github.run_id }}
+          path: npc-timing.json
+          if-no-files-found: ignore
