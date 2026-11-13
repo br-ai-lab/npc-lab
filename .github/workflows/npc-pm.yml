@@ -28,7 +28,7 @@ jobs:
           private-key: ${{ secrets.NPC_PM_PRIVATE_KEY }}
           role-slug: npc-pm
           role-prompt: .github/npc/roles/pm.md
-          allowed-tools: "Bash(git:*),Bash(gh:*),Bash(npm:*),Bash(cd:*),Bash(timeout:*),Bash(node:*),Bash(ls:*),Bash(cat:*),Bash(grep:*),Bash(find:*),Bash(mkdir:*),Bash(cp:*),Bash(mv:*),Bash(sed:*),Bash(head:*),Bash(tail:*),Bash(wc:*),Bash(pwd:*),Bash(echo:*),Bash(test:*),Read,Write,Edit,Glob,Grep"
+          allowed-tools: "Bash(git:*),Bash(gh:*),Bash(npm:*),Bash(cd:*),Bash(timeout:*),Bash(node:*),Bash(ls:*),Bash(cat:*),Bash(grep:*),Bash(find:*),Bash(mkdir:*),Bash(cp:*),Bash(mv:*),Bash(sed:*),Bash(head:*),Bash(tail:*),Bash(wc:*),Bash(pwd:*),Bash(echo:*),Bash(test:*),Bash(nohup:*),Bash(kill:*),Bash(sleep:*),Bash(bash:*),Bash(sh:*),Bash(env:*),Bash(export:*),Read,Write,Edit,Glob,Grep"
           issue-number: ${{ github.event.issue.number || github.event.client_payload.issue }}
           trigger-comment: ${{ format('NPC report for issue {0}', github.event.client_payload.issue) }}
           branch: ${{ github.event.client_payload.branch || format('ai-npcs/issue-{0}', github.event.issue.number) }}
