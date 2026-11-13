@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { buildAgentEnv, buildUserPrompt, handoffCommands, parseAgentOutput, resolveNext } from "../scripts/run-agent.mjs";
+import { budgetForRole, buildAgentEnv, buildUserPrompt, handoffCommands, parseAgentOutput, resolveNext } from "../scripts/run-agent.mjs";
 
 test("user prompt includes issue, branch, and trigger", () => {
   const text = buildUserPrompt({ issue: 4, branch: "ai-npcs/issue-4", triggerComment: "@npc-pm 请开始" });
@@ -53,6 +53,11 @@ test("handoff commands pull before push", () => {
   assert.match(commands[0], /git pull --rebase --autostash/);
   assert.ok(commands.includes("git push"));
   assert.ok(commands.findIndex((c) => c.includes("git pull --rebase")) < commands.indexOf("git push"));
+});
+
+test("returns the role time budget", () => {
+  assert.deepEqual(budgetForRole("npc-qa"), { maxTurns: 40, maxWallClockMinutes: 35 });
+  assert.deepEqual(budgetForRole("missing"), { maxTurns: 40, maxWallClockMinutes: 30 });
 });
 
 test("uses stdout NEXT when present", async () => {

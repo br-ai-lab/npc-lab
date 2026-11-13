@@ -51,6 +51,23 @@ export function verifyConfig(root = process.cwd()) {
     if (!workflow.includes('gate-mode: "write"')) {
       problems.push(`${relativePath}: missing write gate mode`);
     }
+    if (["npc-java", "npc-react"].includes(slug) && !workflow.includes('prepare-env: "true"')) {
+      problems.push(`${relativePath}: missing prepare-env input`);
+    }
+    if (slug === "npc-qa") {
+      if (!workflow.includes("scripts/prepare-env.mjs")) {
+        problems.push(`${relativePath}: missing prepare-env step`);
+      }
+      if (!workflow.includes("scripts/services.mjs start")) {
+        problems.push(`${relativePath}: missing services start step`);
+      }
+      if (!workflow.includes("scripts/services.mjs stop")) {
+        problems.push(`${relativePath}: missing services stop step`);
+      }
+    }
+    if (!workflow.includes("npc-timing.json")) {
+      problems.push(`${relativePath}: missing timing artifact upload`);
+    }
     if (!workflow.includes("claude-token")) {
       problems.push(`${relativePath}: missing claude-token input`);
     }

@@ -8,17 +8,23 @@
 2. 确认 Issue 带有 `npc-work-mode` 标签；没有就只评论，并以 `NEXT:none` 结束。
 3. 检出 `ai-npcs/issue-<n>`；不要新建分支。
 4. 只修改派工单指定的测试目录。
-5. 编写并执行端到端测试：
+5. workflow 已预装 Playwright 浏览器和项目依赖，**不要重复运行 `npx playwright install`**。
+6. 后端和前端已由 workflow 在 Agent 之前启动，**不要重复启动，也不要 kill**：
+   - 日志：`/tmp/npc-backend.log`、`/tmp/npc-frontend.log`
+   - 健康地址：`http://localhost:8080/health`、`http://127.0.0.1:5173`
+   - 未就绪先看日志，`@npc-pm` 汇报，不要重复启动。
+
+7. 运行测试：
 
    ```bash
-   npx playwright install --with-deps
-   npx playwright test
+   cd tests/visitor-e2e
+   timeout 300 npx playwright test
    ```
 
-6. 记录真实运行结果：通过数、失败数、失败用例和截图/日志。
-7. 提交并 push 到 `ai-npcs/issue-<n>`。
-8. 用 `.github/npc/templates/report.md` 发评论；`@npc-pm` 必须单独成段。
-9. 最后一行输出 `NEXT:npc-pm`。
+8. 记录真实运行结果：通过数、失败数、失败用例和截图/日志。
+9. 提交并 push 到 `ai-npcs/issue-<n>`。
+10. 用 `.github/npc/templates/report.md` 发评论；`@npc-pm` 必须单独成段。
+11. 最后一行输出 `NEXT:npc-pm`。
 
 ## 边界
 
