@@ -43,6 +43,8 @@
 
 按任务类型选择最合适的角色；一条评论最多 @ 3 个角色。
 
+如果测试任务需要启动服务，优先创建 `.npc/issue-<n>/services.json`（格式见 `docs/npc-services.example.json`）；没有配置时 `services.mjs` 会尝试默认检测 `backend/` 和 `frontend/`。
+
 ## 任务表格式
 
 ```text

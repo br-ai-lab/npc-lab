@@ -3,6 +3,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 import { getRole } from "./team.mjs";
 import { parseNext } from "./next.mjs";
+import { summarizeEvents } from "./timing.mjs";
 
 const HANDOFF_LIMIT = 20;
 const COST_LIMIT_USD = 10;
@@ -168,7 +169,19 @@ function runClaude(args, env, timeoutMs) {
     });
     let stdout = "";
     let stderr = "";
+    let buffer = "";
     let timedOut = false;
+    const events = [];
+
+    const recordLine = (line) => {
+      const trimmed = line.trim();
+      if (!trimmed) return;
+      try {
+        events.push({ t: Date.now(), event: JSON.parse(trimmed) });
+      } catch {
+        // ignore non-JSON lines
+      }
+    };
 
     const killGroup = (signal) => {
       try {
@@ -191,6 +204,12 @@ function runClaude(args, env, timeoutMs) {
     child.stdout.on("data", (chunk) => {
       stdout += chunk;
       process.stdout.write(chunk);
+      buffer += chunk;
+      let newline;
+      while ((newline = buffer.indexOf("\n")) >= 0) {
+        recordLine(buffer.slice(0, newline));
+        buffer = buffer.slice(newline + 1);
+      }
     });
     child.stderr.on("data", (chunk) => {
       stderr += chunk;
@@ -198,11 +217,13 @@ function runClaude(args, env, timeoutMs) {
     });
     child.on("error", (error) => {
       clearTimeout(timer);
-      resolve({ stdout, stderr, status: 1, error, timedOut });
+      recordLine(buffer);
+      resolve({ stdout, stderr, status: 1, error, timedOut, events });
     });
     child.on("close", (status) => {
       clearTimeout(timer);
-      resolve({ stdout, stderr, status: status ?? 1, timedOut });
+      recordLine(buffer);
+      resolve({ stdout, stderr, status: status ?? 1, timedOut, events });
     });
   });
 }
@@ -256,6 +277,16 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
 
   const stdout = result.stdout ?? "";
   writeFileSync("agent-output.txt", stdout, "utf8");
+
+  const timing = summarizeEvents(result.events ?? []);
+  writeFileSync("npc-timing.json", `${JSON.stringify(timing, null, 2)}\n`, "utf8");
+  console.log(
+    `npc timing: wall=${(timing.wallClockMs / 1000).toFixed(1)}s ` +
+      `model=${(timing.modelApiMs / 1000).toFixed(1)}s ` +
+      `tools=${timing.toolCalls} top=${timing.topTools
+        .map((tool) => `${tool.name}:${(tool.totalMs / 1000).toFixed(1)}s`)
+        .join(",")}`,
+  );
 
   if (result.timedOut) {
     const message =

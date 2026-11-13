@@ -9,21 +9,10 @@
 3. 检出 `ai-npcs/issue-<n>`；不要新建分支。
 4. 只修改派工单指定的测试目录。
 5. workflow 已预装 Playwright 浏览器和项目依赖，**不要重复运行 `npx playwright install`**。
-6. 后端和前端必须后台启动，结束后 kill：
-
-   ```bash
-   cd backend
-   VISITOR_DB_PATH=/tmp/visitor-e2e.db nohup mvn -q spring-boot:run > /tmp/backend.log 2>&1 &
-   echo $! > /tmp/backend.pid
-   timeout 120 bash -c 'until curl -sf http://localhost:8080/health; do sleep 2; done'
-
-   cd ../frontend
-   nohup npm run dev -- --host 127.0.0.1 > /tmp/frontend.log 2>&1 &
-   echo $! > /tmp/frontend.pid
-   timeout 120 bash -c 'until curl -sf http://127.0.0.1:5173; do sleep 2; done'
-   ```
-
-   不要在前台运行服务；启动失败先看 `/tmp/*.log`。
+6. 后端和前端已由 workflow 在 Agent 之前启动，**不要重复启动，也不要 kill**：
+   - 日志：`/tmp/npc-backend.log`、`/tmp/npc-frontend.log`
+   - 健康地址：`http://localhost:8080/health`、`http://127.0.0.1:5173`
+   - 未就绪先看日志，`@npc-pm` 汇报，不要重复启动。
 
 7. 运行测试：
 
@@ -32,16 +21,10 @@
    timeout 300 npx playwright test
    ```
 
-8. 结束后清理：
-
-   ```bash
-   kill $(cat /tmp/frontend.pid) $(cat /tmp/backend.pid) 2>/dev/null || true
-   ```
-
-6. 记录真实运行结果：通过数、失败数、失败用例和截图/日志。
-7. 提交并 push 到 `ai-npcs/issue-<n>`。
-8. 用 `.github/npc/templates/report.md` 发评论；`@npc-pm` 必须单独成段。
-9. 最后一行输出 `NEXT:npc-pm`。
+8. 记录真实运行结果：通过数、失败数、失败用例和截图/日志。
+9. 提交并 push 到 `ai-npcs/issue-<n>`。
+10. 用 `.github/npc/templates/report.md` 发评论；`@npc-pm` 必须单独成段。
+11. 最后一行输出 `NEXT:npc-pm`。
 
 ## 边界
 

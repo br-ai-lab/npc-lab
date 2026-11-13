@@ -42,3 +42,10 @@ jobs:
           anthropic-default-opus-model: ${{ secrets.ANTHROPIC_DEFAULT_OPUS_MODEL }}
           anthropic-default-sonnet-model: ${{ secrets.ANTHROPIC_DEFAULT_SONNET_MODEL }}
           anthropic-default-haiku-model: ${{ secrets.ANTHROPIC_DEFAULT_HAIKU_MODEL }}
+      - name: Upload NPC timing
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: npc-timing-${{ github.run_id }}
+          path: npc-timing.json
+          if-no-files-found: ignore
