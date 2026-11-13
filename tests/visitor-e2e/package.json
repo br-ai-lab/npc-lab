@@ -1,0 +1,16 @@
+{
+  "name": "visitor-management-e2e",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Playwright API + end-to-end tests for the company visitor management system",
+  "type": "module",
+  "scripts": {
+    "test": "playwright test",
+    "test:api": "playwright test specs/api",
+    "test:e2e": "playwright test specs/e2e",
+    "report": "playwright show-report"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.65.0"
+  }
+}
