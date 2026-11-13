@@ -1,0 +1,20 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: visitor-management-backend
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+    default-property-inclusion: always
+
+app:
+  database:
+    # SQLite database file. Relative paths are resolved against the working directory
+    # (normally the backend/ directory). Override with VISITOR_DB_PATH if needed.
+    path: ${VISITOR_DB_PATH:data/visitor.db}
+
+logging:
+  level:
+    com.company.visitor: INFO
