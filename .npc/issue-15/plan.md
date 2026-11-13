@@ -46,21 +46,30 @@ Base URL：`http://localhost:8080`
 
 `status` 取值：`PENDING`（待确认）/ `APPROVED`（已确认，在访）/ `REJECTED`（已拒绝）/ `LEFT`（已离开）
 
+### 后端实现补充（T2 汇报，T3/T4 对齐用）
+
+- `GET /api/visitors` 直接返回 JSON 数组，无外层包装。
+- `GET /api/visitors/stats` 键名：`date, total, pending, inVisit, left, rejected`，另附兼容字段 `approved`（与 `inVisit` 同值）；`total` 为今日登记总数（含已拒绝）。
+- approve/reject/checkout 均返回更新后的访客对象；额外字段 `rejectReason` 保存拒绝原因。
+- 时间统一 ISO-8601 本地时间字符串（如 `2026-11-13T09:00:00`）。
+- 状态机非法流转 409、不存在 404、参数错误 400（含 `message` + `fieldErrors`）。
+
 ## 任务表
 
 | 编号 | 任务 | 负责角色 | 优先级 | 依赖 | 状态 | 验收标准 | 证据 |
 |---|---|---|---|---|---|---|---|
 | T1 | OCR 识别 `assets/公司访客管理制度.png`，整理为 `docs/visitor-management-policy.md` | npc-ocr | P0 | 无 | 已完成 | 七个章节（目的、适用范围、访客登记、进入公司、离开公司、其他规定、附则）完整；登记字段齐全；Markdown 结构清晰、可读 | `docs/visitor-management-policy.md`，提交 `d4a7946` |
-| T2 | Java 后端：Spring Boot + SQLite 访客管理 API | npc-java | P0 | T1 ✅ | 进行中 | `backend/` 可构建；`/health` 返回 UP；登记/列表/确认/拒绝/离开/统计接口可用；字段校验与错误 JSON；SQLite 持久化；`mvn -q -DskipTests package` 通过 | - |
-| T3 | React 前端：登记、列表、确认/拒绝、离开、统计页面 | npc-react | P0 | T1 ✅ | 进行中 | `frontend/` 可 `npm run build`；中文界面；登记表单字段与制度一致且有校验提示；列表支持状态/关键字/日期筛选；确认、拒绝、离开操作可用；错误提示清晰；响应式布局 | - |
-| T4 | Playwright 端到端测试 | npc-qa | P1 | T2,T3 | 待开始 | `tests/visitor-e2e` 可运行；覆盖登记→列表→确认→离开主流程与至少 1 个校验/异常用例；记录真实通过/失败数 | - |
+| T2 | Java 后端：Spring Boot + SQLite 访客管理 API | npc-java | P0 | T1 ✅ | 已完成 | `backend/` 可构建；`/health` 返回 UP；登记/列表/确认/拒绝/离开/统计接口可用；字段校验与错误 JSON；SQLite 持久化；`mvn -q -DskipTests package` 通过 | `backend/`，提交 `70a3ddd`；`mvn test` 8/8 通过；curl 实测主流程、409、400、404、过滤、CORS、重启持久化均通过 |
+| T3 | React 前端：登记、列表、确认/拒绝/离开、统计页面 | npc-react | P0 | T1 ✅ | 进行中 | `frontend/` 可 `npm run build`；中文界面；登记表单字段与制度一致且有校验提示；列表支持状态/关键字/日期筛选；确认、拒绝、离开操作可用；错误提示清晰；响应式布局 | - |
+| T4 | Playwright 端到端测试 | npc-qa | P1 | T2 ✅,T3 | 待开始 | `tests/visitor-e2e` 可运行；覆盖登记→列表→确认→离开主流程与至少 1 个校验/异常用例；记录真实通过/失败数 | - |
 
 ## 派发顺序
 
 1. ✅ 先派 T1（npc-ocr）——制度文本是后续任务的需求依据。
 2. ✅ T1 完成并核对后，并行派 T2（npc-java）与 T3（npc-react）。
-3. T2、T3 均完成后派 T4（npc-qa）。
-4. 测试通过后汇总，PR 交由人类 review。
+3. ⏳ T2 已完成；T3 仍在执行中（NPC React workflow 进行中，不重复派发）。
+4. T3 完成后派 T4（npc-qa）。
+5. 测试通过后汇总，PR 交由人类 review。
 
 ## 备注
 
