@@ -21,14 +21,31 @@ export function buildUserPrompt({ issue, branch, triggerComment }) {
 }
 
 export function parseAgentOutput(stdout) {
+  const raw = String(stdout ?? "").trim();
+
   try {
-    const data = JSON.parse(String(stdout ?? "").trim());
+    const data = JSON.parse(raw);
     return {
       text: String(data.result ?? ""),
       costUsd: Number(data.total_cost_usd ?? 0),
     };
   } catch {
-    return { text: String(stdout ?? ""), costUsd: 0 };
+    // stream-json: one JSON object per line; use the last result event.
+    const lines = raw.split("\n").map((line) => line.trim()).filter(Boolean);
+    for (let index = lines.length - 1; index >= 0; index -= 1) {
+      try {
+        const data = JSON.parse(lines[index]);
+        if (data && typeof data === "object" && ("result" in data || data.type === "result")) {
+          return {
+            text: String(data.result ?? ""),
+            costUsd: Number(data.total_cost_usd ?? 0),
+          };
+        }
+      } catch {
+        // ignore non-JSON lines
+      }
+    }
+    return { text: raw, costUsd: 0 };
   }
 }
 
@@ -114,7 +131,7 @@ function writeHandoff(issue, count) {
 
 export function handoffCommands({ issue, branch, count }) {
   return [
-    `git pull --rebase origin ${branch}`,
+    `git pull --rebase --autostash origin ${branch}`,
     `git add .npc/issue-${issue}/handoff.json`,
     `git commit -m "chore: handoff ${count} for issue ${issue}"`,
     "git push",
@@ -185,7 +202,8 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
       "--max-turns",
       "60",
       "--output-format",
-      "json",
+      "stream-json",
+      "--verbose",
     ],
     buildAgentEnv(process.env),
   );

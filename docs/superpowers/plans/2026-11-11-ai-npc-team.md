@@ -6,6 +6,8 @@
 
 **架构：** One GitHub App per role supplies identity and write permissions. Each role has a GitHub Actions workflow that runs a headless Claude Code agent with a role prompt and skill. The first NPC creates `ai-npcs/issue-<n>` and a draft PR; every commit for that issue goes to that branch. Agents post comments with their App token and end their output with `NEXT:<role>`; the workflow dispatches the next role with `repository_dispatch`, avoiding GitHub's `GITHUB_TOKEN` anti-recursion rule.
 
+> 实施后调整：人类评论统一由 `.github/workflows/npc-dispatch.yml` 分发；5 个角色 workflow 只保留 `repository_dispatch`，避免每条评论产生 5 个 skipped run。
+
 **技术栈：** GitHub Actions, GitHub Apps, `actions/create-github-app-token`, Node.js 22 (built-in `node:test`), Claude Code CLI (`@anthropic-ai/claude-code`), `gh` CLI, Git. Stage 1: PM + Java. Stage 2 adds OCR (Tesseract), React (Node/Vite), QA (Playwright).
 
 **需求文档：** `docs/requirements.md`
@@ -19,6 +21,7 @@
 - PR 保持 draft/open，直到人类合并。不自动合并。不直接推 `main`。
 - 人类添加 `npc-work-mode` 标签并评论 `@npc-pm` 来启动；只有 `OWNER`、`MEMBER`、`COLLABORATOR` 可以启动。
 - 所有写操作都用该角色自己的 GitHub App 安装令牌；评论、提交、PR、dispatch 一律不用 `GITHUB_TOKEN`。
+- 人类评论由 `npc-dispatch.yml` 统一分发；角色 workflow 只监听 `repository_dispatch`。
 - 模型认证二选一：`CLAUDE_CODE_OAUTH_TOKEN`，或 `ANTHROPIC_AUTH_TOKEN` + `ANTHROPIC_BASE_URL`（模型变量可选）。
 - 评论跟随 Issue 主体语言；代码、标识符、接口名保持英文。
 - 每个 Issue 最多 20 次接力。一条评论最多 3 个角色提及。单次完整运行预算上限 $10。

@@ -45,8 +45,11 @@ export function verifyConfig(root = process.cwd()) {
       problems.push(`missing workflow: ${relativePath}`);
       continue;
     }
-    if (!workflow.includes("github.event.comment.user.type == 'User'")) {
-      problems.push(`${relativePath}: missing human-only comment gate`);
+    if (!workflow.includes("repository_dispatch")) {
+      problems.push(`${relativePath}: missing repository_dispatch trigger`);
+    }
+    if (!workflow.includes('gate-mode: "write"')) {
+      problems.push(`${relativePath}: missing write gate mode`);
     }
     if (!workflow.includes("claude-token")) {
       problems.push(`${relativePath}: missing claude-token input`);
@@ -64,6 +67,18 @@ export function verifyConfig(root = process.cwd()) {
       if (workflow.includes(command)) {
         problems.push(`${relativePath}: forbidden merge command ${command}`);
       }
+    }
+  }
+
+  const dispatcher = read(root, ".github/workflows/npc-dispatch.yml");
+  if (dispatcher === null) {
+    problems.push("missing dispatcher workflow");
+  } else {
+    if (!dispatcher.includes("github.event.comment.user.type == 'User'")) {
+      problems.push("dispatcher: missing human-only comment gate");
+    }
+    if (!dispatcher.includes("scripts/dispatch-comment.mjs")) {
+      problems.push("dispatcher: missing dispatch-comment step");
     }
   }
 

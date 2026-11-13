@@ -15,6 +15,15 @@ test("parses the JSON result and cost", () => {
   assert.deepEqual(parseAgentOutput(stdout), { text: "done\nNEXT:npc-pm", costUsd: 0.42 });
 });
 
+test("parses a stream-json result line", () => {
+  const stdout = [
+    JSON.stringify({ type: "system", subtype: "init" }),
+    JSON.stringify({ type: "assistant", message: { content: [{ type: "text", text: "working" }] } }),
+    JSON.stringify({ type: "result", result: "done\nNEXT:npc-java", total_cost_usd: 0.12 }),
+  ].join("\n");
+  assert.deepEqual(parseAgentOutput(stdout), { text: "done\nNEXT:npc-java", costUsd: 0.12 });
+});
+
 test("drops empty auth env vars and keeps the provided one", () => {
   const env = buildAgentEnv({
     ANTHROPIC_AUTH_TOKEN: "",
@@ -41,7 +50,7 @@ test("requires one auth credential", () => {
 
 test("handoff commands pull before push", () => {
   const commands = handoffCommands({ issue: 5, branch: "ai-npcs/issue-5", count: 2 });
-  assert.match(commands[0], /git pull --rebase/);
+  assert.match(commands[0], /git pull --rebase --autostash/);
   assert.ok(commands.includes("git push"));
   assert.ok(commands.findIndex((c) => c.includes("git pull --rebase")) < commands.indexOf("git push"));
 });
