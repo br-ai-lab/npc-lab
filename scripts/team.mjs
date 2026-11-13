@@ -7,6 +7,8 @@ export const TEAM = [
     promptPath: ".github/npc/roles/pm.md",
     skillPath: ".claude/skills/npc-pm/SKILL.md",
     scope: "协调、拆任务、总结；不写业务代码",
+    maxTurns: 30,
+    maxWallClockMinutes: 15,
   },
   {
     slug: "npc-ocr",
@@ -16,6 +18,8 @@ export const TEAM = [
     promptPath: ".github/npc/roles/ocr.md",
     skillPath: ".claude/skills/npc-ocr/SKILL.md",
     scope: "图片识别、docs/",
+    maxTurns: 30,
+    maxWallClockMinutes: 15,
   },
   {
     slug: "npc-java",
@@ -25,6 +29,8 @@ export const TEAM = [
     promptPath: ".github/npc/roles/java.md",
     skillPath: ".claude/skills/npc-java/SKILL.md",
     scope: "后端目录",
+    maxTurns: 50,
+    maxWallClockMinutes: 25,
   },
   {
     slug: "npc-react",
@@ -34,6 +40,8 @@ export const TEAM = [
     promptPath: ".github/npc/roles/react.md",
     skillPath: ".claude/skills/npc-react/SKILL.md",
     scope: "前端目录",
+    maxTurns: 40,
+    maxWallClockMinutes: 25,
   },
   {
     slug: "npc-qa",
@@ -43,6 +51,8 @@ export const TEAM = [
     promptPath: ".github/npc/roles/qa.md",
     skillPath: ".claude/skills/npc-qa/SKILL.md",
     scope: "测试目录",
+    maxTurns: 40,
+    maxWallClockMinutes: 35,
   },
 ];
 
@@ -74,10 +84,19 @@ export function validateTeam(team = TEAM) {
       "promptPath",
       "skillPath",
       "scope",
+      "maxTurns",
+      "maxWallClockMinutes",
     ]) {
       if (!role[field]) {
         throw new Error(`missing ${field} for ${role.slug}`);
       }
+    }
+
+    if (!Number.isInteger(role.maxTurns) || role.maxTurns <= 0) {
+      throw new Error(`invalid maxTurns for ${role.slug}`);
+    }
+    if (!Number.isInteger(role.maxWallClockMinutes) || role.maxWallClockMinutes <= 0) {
+      throw new Error(`invalid maxWallClockMinutes for ${role.slug}`);
     }
 
     if (!/^npc-[a-z0-9-]+$/.test(role.eventType)) {

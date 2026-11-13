@@ -1,4 +1,4 @@
-import { execSync, spawn } from "node:child_process";
+import { execFileSync, execSync, spawn } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 import { getRole } from "./team.mjs";
@@ -47,6 +47,14 @@ export function parseAgentOutput(stdout) {
     }
     return { text: raw, costUsd: 0 };
   }
+}
+
+export function budgetForRole(roleSlug) {
+  const role = getRole(roleSlug);
+  return {
+    maxTurns: role?.maxTurns ?? 40,
+    maxWallClockMinutes: role?.maxWallClockMinutes ?? 30,
+  };
 }
 
 export async function resolveNext({ text, issue, roleSlug, run }) {
@@ -145,11 +153,40 @@ function run(cmd) {
   });
 }
 
-function runClaude(args, env) {
+function ghIssueComment(issue, body) {
+  execFileSync("gh", ["issue", "comment", String(issue), "--body", body], {
+    stdio: "inherit",
+  });
+}
+
+function runClaude(args, env, timeoutMs) {
   return new Promise((resolve) => {
-    const child = spawn("claude", args, { env, stdio: ["ignore", "pipe", "pipe"] });
+    const child = spawn("claude", args, {
+      env,
+      stdio: ["ignore", "pipe", "pipe"],
+      detached: true,
+    });
     let stdout = "";
     let stderr = "";
+    let timedOut = false;
+
+    const killGroup = (signal) => {
+      try {
+        process.kill(-child.pid, signal);
+      } catch {
+        try {
+          child.kill(signal);
+        } catch {
+          // already gone
+        }
+      }
+    };
+
+    const timer = setTimeout(() => {
+      timedOut = true;
+      killGroup("SIGTERM");
+      setTimeout(() => killGroup("SIGKILL"), 5000).unref();
+    }, timeoutMs);
 
     child.stdout.on("data", (chunk) => {
       stdout += chunk;
@@ -159,8 +196,14 @@ function runClaude(args, env) {
       stderr += chunk;
       process.stderr.write(chunk);
     });
-    child.on("error", (error) => resolve({ stdout, stderr, status: 1, error }));
-    child.on("close", (status) => resolve({ stdout, stderr, status: status ?? 1 }));
+    child.on("error", (error) => {
+      clearTimeout(timer);
+      resolve({ stdout, stderr, status: 1, error, timedOut });
+    });
+    child.on("close", (status) => {
+      clearTimeout(timer);
+      resolve({ stdout, stderr, status: status ?? 1, timedOut });
+    });
   });
 }
 
@@ -170,6 +213,8 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   const rolePromptPath = process.env.ROLE_PROMPT;
   const allowedTools = process.env.ALLOWED_TOOLS || "Bash,Read,Write,Edit,Glob,Grep";
   const owner = process.env.GITHUB_REPOSITORY_OWNER || "owner";
+  const roleSlug = process.env.ROLE_SLUG || "npc-pm";
+  const budget = budgetForRole(roleSlug);
 
   if (!issue || !branch || !rolePromptPath) {
     console.error("ISSUE_NUMBER, BRANCH, and ROLE_PROMPT are required");
@@ -200,16 +245,33 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
       "--permission-mode",
       "acceptEdits",
       "--max-turns",
-      "60",
+      String(budget.maxTurns),
       "--output-format",
       "stream-json",
       "--verbose",
     ],
     buildAgentEnv(process.env),
+    budget.maxWallClockMinutes * 60 * 1000,
   );
 
   const stdout = result.stdout ?? "";
   writeFileSync("agent-output.txt", stdout, "utf8");
+
+  if (result.timedOut) {
+    const message =
+      roleSlug === "npc-pm"
+        ? `@${owner} 项目经理超过 ${budget.maxWallClockMinutes} 分钟时间预算，已停止，请人工介入。`
+        : `@npc-pm ${roleSlug} 超过 ${budget.maxWallClockMinutes} 分钟时间预算，已停止；请拆分任务或调整策略。`;
+    try {
+      ghIssueComment(issue, message);
+    } catch (error) {
+      console.error(`timeout comment failed: ${error.message}`);
+    }
+    if (roleSlug !== "npc-pm") {
+      await dispatchNext({ role: "npc-pm", issue, branch, run });
+    }
+    process.exit(0);
+  }
 
   if (result.error) {
     console.error(result.error);
@@ -230,7 +292,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     }
   } catch (error) {
     try {
-      run(`git pull --rebase origin ${branch}`);
+      run(`git pull --rebase --autostash origin ${branch}`);
       run("git push");
     } catch (retryError) {
       console.error(`handoff commit skipped: ${retryError.message}`);
@@ -245,7 +307,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   const next = await resolveNext({
     text,
     issue,
-    roleSlug: process.env.ROLE_SLUG || "npc-pm",
+    roleSlug,
     run,
   });
   if (next.error) {

@@ -29,12 +29,16 @@ jobs:
         with:
           distribution: temurin
           java-version: "25"
-      - name: Pre-install project dependencies
-        shell: bash
-        run: |
-          if [ -f backend/pom.xml ]; then (cd backend && timeout 600 mvn -q -DskipTests dependency:go-offline) || echo "backend preinstall skipped"; fi
-          if [ -f frontend/package-lock.json ]; then (cd frontend && timeout 600 npm ci) || echo "frontend preinstall skipped"; fi
-          if [ -f tests/visitor-e2e/package-lock.json ]; then (cd tests/visitor-e2e && timeout 600 npm ci) || echo "e2e preinstall skipped"; fi
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.npm
+            ~/.m2
+            ~/.cache/ms-playwright
+          key: ${{ runner.os }}-npc-${{ hashFiles('**/package-lock.json', '**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-npc-
       - name: Install Playwright
         shell: bash
         run: npx playwright install --with-deps
@@ -51,6 +55,7 @@ jobs:
           ensure-branch-pr: "false"
           gate: "true"
           gate-mode: "write"
+          prepare-env: "true"
           claude-token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           anthropic-auth-token: ${{ secrets.ANTHROPIC_AUTH_TOKEN }}
           anthropic-base-url: ${{ secrets.ANTHROPIC_BASE_URL }}

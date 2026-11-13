@@ -66,6 +66,10 @@ inputs:
     description: start or write
     required: false
     default: "start"
+  prepare-env:
+    description: Install detected project dependencies
+    required: false
+    default: "false"
 
 runs:
   using: composite
@@ -135,6 +139,11 @@ runs:
         BRANCH: ${{ inputs.branch }}
         BASE_BRANCH: main
       run: node scripts/ensure-branch-pr.mjs
+
+    - name: Prepare project dependencies
+      if: inputs.prepare-env == 'true'
+      shell: bash
+      run: node scripts/prepare-env.mjs
 
     - name: Run NPC agent
       shell: bash

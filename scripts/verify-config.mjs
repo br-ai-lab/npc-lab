@@ -51,6 +51,9 @@ export function verifyConfig(root = process.cwd()) {
     if (!workflow.includes('gate-mode: "write"')) {
       problems.push(`${relativePath}: missing write gate mode`);
     }
+    if (["npc-java", "npc-react", "npc-qa"].includes(slug) && !workflow.includes('prepare-env: "true"')) {
+      problems.push(`${relativePath}: missing prepare-env input`);
+    }
     if (!workflow.includes("claude-token")) {
       problems.push(`${relativePath}: missing claude-token input`);
     }
