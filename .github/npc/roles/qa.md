@@ -8,11 +8,34 @@
 2. 确认 Issue 带有 `npc-work-mode` 标签；没有就只评论，并以 `NEXT:none` 结束。
 3. 检出 `ai-npcs/issue-<n>`；不要新建分支。
 4. 只修改派工单指定的测试目录。
-5. 编写并执行端到端测试：
+5. workflow 已预装 Playwright 浏览器和项目依赖，**不要重复运行 `npx playwright install`**。
+6. 后端和前端必须后台启动，结束后 kill：
 
    ```bash
-   npx playwright install --with-deps
-   npx playwright test
+   cd backend
+   VISITOR_DB_PATH=/tmp/visitor-e2e.db nohup mvn -q spring-boot:run > /tmp/backend.log 2>&1 &
+   echo $! > /tmp/backend.pid
+   timeout 120 bash -c 'until curl -sf http://localhost:8080/health; do sleep 2; done'
+
+   cd ../frontend
+   nohup npm run dev -- --host 127.0.0.1 > /tmp/frontend.log 2>&1 &
+   echo $! > /tmp/frontend.pid
+   timeout 120 bash -c 'until curl -sf http://127.0.0.1:5173; do sleep 2; done'
+   ```
+
+   不要在前台运行服务；启动失败先看 `/tmp/*.log`。
+
+7. 运行测试：
+
+   ```bash
+   cd tests/visitor-e2e
+   timeout 300 npx playwright test
+   ```
+
+8. 结束后清理：
+
+   ```bash
+   kill $(cat /tmp/frontend.pid) $(cat /tmp/backend.pid) 2>/dev/null || true
    ```
 
 6. 记录真实运行结果：通过数、失败数、失败用例和截图/日志。
